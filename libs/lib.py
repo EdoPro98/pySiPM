@@ -177,13 +177,14 @@ def SiPMSignalAction(times, sigH, SNR, BASESPREAD):
     signal : np.ndarray
     Array containing the generated SiPM signal
     """
-    sigH = sigH[times < SIGLEN]
-    times = np.uint32(times[times < SIGLEN] / SAMPLING)
-    baseline = random.gauss(0, BASESPREAD)           # Add a baseline
+    baseline = 0
     signal = frandom.randn(baseline, SNR, SIGPTS)    # Start with gaussian noise
-    gainvars = frandom.randn(1, CCGV, times.size)    # Each signal has a ccgv
-    for i in range(times.size):                      # Generate signals and sum them
-        signal += PulseCPU(times[i], sigH[i], gainvars[i])
+    if times.size:
+        sigH = sigH[times < SIGLEN]
+        times = np.uint32(times[times < SIGLEN] / SAMPLING)
+        gainvars = frandom.randn(1, CCGV, times.size)    # Each signal has a ccgv
+        for i in range(times.size):                      # Generate signals and sum them
+            signal += PulseCPU(times[i], sigH[i], gainvars[i])
     return signal
 
 
@@ -228,9 +229,27 @@ else:								# Recalculate the signal each time
     if args.device == 'gpu':
         from libs.libGPU import *   # Cpu for low light and cpu for high light
 
+
+def signalAnalysis(signal, intstart, intgate, threshld):
+    sigingate = signal[intstart:intstart + intgate]
+
+    peak = sigingate.max()
+    if peak > threshld:
+        integral = sigingate.sum() * SAMPLING
+        toa = (sigingate > threshld).argmax() * SAMPLING
+        tot = np.count_nonzero(sigingate > threshld) * SAMPLING
+        top = (sigingate).argmax() * SAMPLING
+    else:
+        peak = -1
+        integral = -1
+        toa = -1
+        tot = -1
+        top = -1
+    return peak, integral, toa, tot, top
+
+
+
 ### SOME STATISCTICS AT END OF SCRIPT ###
-
-
 def somestats(output, realpe=None):
     """
     somestats(output)

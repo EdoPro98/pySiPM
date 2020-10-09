@@ -1,3 +1,9 @@
+'''
+This file contains the main function used to simulate SiPM events.
+
+Author: Edoardo Proserpio
+Email: eproserpio@studenti.uninsubria.it edoardo.proserpio@gmail.com
+'''
 # Function of simulation
 from libs.lib import *
 from libs.FortranFunctions import signalanalysisfortran
@@ -46,7 +52,8 @@ def SiPM(times, other=None):
         dcrTime = addDCR(DCR)
         if dcrTime.size:
             times = hstack((times, dcrTime))
-    sortfortran(times)
+    if times.size:
+        sortfortran(times)
     # Calculate idx of hitted cells
     idx = HitCells(times)
     # Add XT events
@@ -60,12 +67,7 @@ def SiPM(times, other=None):
 
     # # Select signal in the integration gate
     signalInGate = signal[INTSTART:INTSTART + INTGATE]
-    # integral, peak, tstart, tovert, tpeak = signalanalysisfortran(signalInGate, SAMPLING)
-    integral = signalInGate.sum() * SAMPLING
-    peak = signalInGate.max()
-    tstart = (signalInGate > 1.5).argmax() * SAMPLING
-    tovert = np.count_nonzero(signalInGate > 1.5) * SAMPLING
-    tpeak = (signalInGate).argmax() * SAMPLING
+    integral, peak, tstart, tovert, tpeak = signalAnalysis(signal, INTSTART, INTGATE, 1.5)
     if args.Graphics:
         if not args.signal:
             dev = 'cpu-fast'

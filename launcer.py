@@ -1,3 +1,13 @@
+'''
+This file is used to launch the SiPM simulation using multiprocessing
+module in order to speed up the process. It is possible to save ROOT
+files of the futures extracted from the signals and the waveforms themselves.
+
+Since the signals are kept in RAM untill they are saved on disk it is
+recomended to launch this script on a small dataset if using the -W option
+to save the waveforms. If you need to save waveforms of big datasets use the
+file called 'wavedump.py'.
+'''
 from main import *
 
 # Openig file
@@ -21,8 +31,8 @@ for line in lines:
     if int(L[0]) % 100 == 0 and int(L[0]) > 0 and temp != L[0]:
         temp = L[0]
         print(f'Reading event: {int(L[0]):d} / {int(lines[-1].split()[0]):d}', end='\r')
-    if L[0] == '10':
-        break
+    # if L[0] == '10':
+    #     break
 del lines
 
 OTHER = np.array(OTHER)
@@ -37,8 +47,7 @@ pool = Pool(processes=nJobs, initializer=initializeRandomPool, maxtasksperchild=
 output = np.empty(shape=(NFIB, 5), dtype='float32')
 other = np.empty(shape=(NFIB, 6), dtype='float32')
 if args.wavedump:
-    # Using memmap since this array will be VERY big
-    signals = np.memmap("tmp", shape=(NFIB, SIGPTS), dtype='float32', mode="w+")
+    signals = np.empty(shape=(NFIB, SIGPTS), dtype='float16')
 print('\n===> Starting simulation <===\n')
 
 # Launching simulation
@@ -47,11 +56,11 @@ res = pool.starmap_async(SiPM, INPUT)
 pool.close()
 pool.join()
 Te = time.time()
-res = res.get()
 
-for i, r in enumerate(res):
+for i, r in enumerate(res.get()):
     output[i, :] = r[:5]
     other[i, :] = r[5]
+    signals[i, :] = r[6]
 
 print('\n===> Simulation finished <===\n')
 print(f'Execution time: {(Te-Ts):.2f}s')
@@ -68,5 +77,3 @@ if args.write:
 if args.wavedump:
     print('\n===> Writing waveforms <===\n')
     SaveWaves(args.wavedump, signals)
-    if(os.path.exists("temp")):
-        os.remove("temp")
