@@ -35,8 +35,8 @@ for line in lines:
     if int(L[0]) % 100 == 0 and int(L[0]) > 0 and temp != L[0]:
         temp = L[0]
         print(f'Reading event: {int(L[0]):d} / {int(lines[-1].split()[0]):d}', end='\r')
-    # if L[0] == '100':
-    #     break
+    if L[0] == '1':
+        break
 del lines
 
 OTHER = np.array(OTHER)

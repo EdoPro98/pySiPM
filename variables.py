@@ -216,11 +216,13 @@ if args.clean is not None:
 ###############################################################################
 # Conversion of time units from ns to units of sampling times.
 SAMPLING *= 1.
-TFALL = np.float32(TFALL / SAMPLING)
-TRISE = np.float32(TRISE / SAMPLING)
-CELLRECOVERY = np.float32(CELLRECOVERY / SAMPLING)
-TAUAPFAST = np.float32(TAUAPFAST / SAMPLING)
-TAUAPSLOW = np.float32(TAUAPSLOW / SAMPLING)
+PEAKHEIGHT = -exp(TFALL*np.log(TRISE/TFALL)/(TFALL - TRISE)) + exp(TRISE*np.log(TRISE/TFALL)/(TFALL - TRISE))
+THRESHOLD = 1.5 * PEAKHEIGHT
+# TFALL = np.float32(TFALL / SAMPLING)
+# TRISE = np.float32(TRISE / SAMPLING)
+# CELLRECOVERY = np.float32(CELLRECOVERY / SAMPLING)
+# TAUAPFAST = np.float32(TAUAPFAST / SAMPLING)
+# TAUAPSLOW = np.float32(TAUAPSLOW / SAMPLING)
 SIGPTS = int(SIGLEN / SAMPLING)
 CELLSIDE = int(SIZE / (CELLSIZE * 1e-3))
 NCELL = int(CELLSIDE**2) - 1
@@ -234,4 +236,4 @@ PREG = PREG / SAMPLING
 PREG = int(INTSTART - PREG)
 b = TFALL / TRISE
 NORMPE = 1  # (b**(1/(1-b))-b**(1/((1/b)-1)))**-1
-SNR = np.sqrt(10**(-SNR / 20))
+SNR = PEAKHEIGHT * 10**(-SNR / 20)

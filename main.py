@@ -67,7 +67,7 @@ def SiPM(times, other=None):
 
     # # Select signal in the integration gate
     signalInGate = signal[INTSTART:INTSTART + INTGATE]
-    integral, peak, tstart, tovert, tpeak = signalAnalysis(signal, INTSTART, INTGATE, 1.5)
+    integral, peak, tstart, tovert, tpeak = signalAnalysis(signal, INTSTART, INTGATE, THRESHOLD)
     if args.Graphics:
         if not args.signal:
             dev = 'cpu-fast'

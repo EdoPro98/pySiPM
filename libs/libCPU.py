@@ -30,5 +30,5 @@ def PulseCPU(t, h, gainvar):
     s : np.ndarray
             Array containing the generated cell signal
     """
-    sig = signalgenfortran(t, h, TFALL, TRISE, SIGPTS, gainvar)    # Calculate signal
+    sig = signalgenfortran(t, h, TFALL / SAMPLING, TRISE / SAMPLING, SIGPTS, gainvar)    # Calculate signal
     return sig

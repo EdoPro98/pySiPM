@@ -3,9 +3,9 @@ FC := gfortran
 F2PY := f2py
 
 
-CF := "-Ofast -fomit-frame-pointer -march=native -mavx2"
+CF := "-Ofast -fomit-frame-pointer -march=native"
 
-FF := --opt="-Ofast -std=f2008 -fomit-frame-pointer -march=native -mavx2"
+FF := --opt="-Ofast -std=f2008 -fomit-frame-pointer -march=native"
 
 
 SRCDIR := src/

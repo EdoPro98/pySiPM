@@ -86,9 +86,9 @@ def addXT(times, idx, xt):
         for i in range(niter):
             temp = []
             tempt = []
+            nxt = frandom.randpoiss(xt, len(xtgen))
             for j in range(len(xtgen)):
-                nxt = frandom.randpoiss(xt, 1)[0]
-                for k in range(nxt):
+                for k in range(nxt[j]):
                     choose = frandom.randint(7, 1)[0]
                     temp.append(xtgen[j] + neighbour[choose])
                     tempt.append(xtgent[j])
@@ -191,7 +191,7 @@ def SiPMSignalAction(times, sigH, SNR, BASESPREAD):
 if args.signal is None:  # If generating signals fast (default)
     x = np.arange(0, SIGPTS)
     # Define the model of my signal (calculate it only once)
-    signalmodel = signalgenfortran(0, 1, TFALL, TRISE, SIGPTS, 1)
+    signalmodel = signalgenfortran(0, 1, TFALL / SAMPLING, TRISE / SAMPLING, SIGPTS, 1)
 
 
     def PulseCPU(t, h, gainvar):

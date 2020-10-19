@@ -44,7 +44,7 @@ def PulseGPU(t, h):
     gainvar = cp.random.normal(1, CCGV, (n, 1), dtype='float32')
     h = h[:, None].astype('float32')    # Transpose array of height values
     # Call kernel to generate singal
-    sig = cp.sum(signalShapeGPU(vect, TFALL, TRISE, gainvar, h), axis=0)
+    sig = cp.sum(signalShapeGPU(vect, TFALL / SAMPLING, TRISE / SAMPLING, gainvar, h), axis=0)
     # If there are afterpulses generate theyr signals
     return sig
 
