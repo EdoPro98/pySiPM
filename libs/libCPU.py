@@ -6,7 +6,7 @@ from variables import *
 ###############################################################################
 ##>>>   EDITING THIS FILE MAY SERIOUSLY COMPROMISE SIMULATION BEHAVIOUR   <<<##
 ###############################################################################
-def PulseCPU(t, h, gainvar, nap):
+def PulseCPU(t, h, gainvar):
     """
     PulseCPU(t,h)
 
@@ -30,47 +30,5 @@ def PulseCPU(t, h, gainvar, nap):
     s : np.ndarray
             Array containing the generated cell signal
     """
-    sig = signalgenfortran(t, h, TFALL, TRISE, SIGPTS, gainvar)    # Calculate signal
-    if nap > 0:  # If there are afterpulses generate theyr signals
-        for _ in range(nap):
-            # APs have a time delay exponential distribution
-            apdel = frandom.randexp(TAUAPFAST, 1) + frandom.randexp(TAUAPSLOW, 1)
-            tap = np.int32(apdel / SAMPLING + t)
-            hap = 1 - exp(-apdel / TFALL)
-            sig += signalgenfortran(tap, hap, TFALL, TRISE, SIGPTS, gainvar)
+    sig = signalgenfortran(t, h, TFALL / SAMPLING, TRISE / SAMPLING, SIGPTS, gainvar)    # Calculate signal
     return sig
-
-
-# Function that passes signals times and height to main function for generating signals
-def SiPMSignalAction(times, sigH, SNR, BASESPREAD):
-    """
-    signalGen(times,sigH,SNR,BASESPREAD)
-
-    Function that passes signal height and times to the main function that
-    generates single signals. Also adds noise.
-
-    Parameters
-    ----------
-    times : np.ndarray(int32)
-            Array containing the time at wich SiPM cells are fired, including xt events (sorted)
-    sigH : np.ndarray(float32)
-            Array containing the pulse height of each fired SiPM cell
-    SNR : double
-            The signal to noise ratio of the noise to add
-    BASESPREAD : double
-            Sigma of the value to add as baseline
-
-    Returns
-    --------
-    signal : np.ndarray
-            Array containing the generated SiPM signal
-    """
-
-    baseline = random.gauss(0, BASESPREAD)  # Add a baseline to the signal
-    # Start with gaussian noise
-    signal = frandom.randn(baseline, SNR, SIGPTS)
-    gainvars = frandom.randn(1, CCGV, times.size)   # Each signal has a ccgv
-    naps = frandom.randpoiss(AP, times.size)   # Generate number of afterpulses
-    for i in range(times.size):
-        signal += PulseCPU(times[i], sigH[i], gainvars[i], naps[i])
-    return(signal)

@@ -25,150 +25,176 @@ def addDCR(rate):
     dcrTime : np.ndarray
             Array containing dcr times
     """
+    dcrTime = [0]
+    while dcrTime[-1] < SIGLEN:  # Generate from exponential distribution of delays
+        delayDCR = frandom.randexp(1/rate, 1) * 1e9
+        dcrTime.extend(dcrTime[-1] + delayDCR)
 
-    if FASTDCR:
-        ndcr = frandom.randpoiss(rate * SIGLEN * 1e-9, 1)  # Poissonian distribution
-        # Times uniformly distributed
-        dcrTime = np.random.random(ndcr) * SIGLEN
-    else:
-        dcrTime = [0]
-        while dcrTime[-1] < SIGLEN:  # Generate from exponential distribution of delays
-            delayDCR = frandom.randexp(1/rate, 1) * 1e9
-            dcrTime.extend(dcrTime[-1] + delayDCR)
-        dcrTime = np.array(dcrTime[1:-1])
-
+    dcrTime = np.array(dcrTime[1:-1])
     return dcrTime
 
 
 ### FUNCTION TO UPDATE THE SIPM MATRIX ARRAY ###
-def SiPMEventAction(time, XT):
+def HitCells(times):
     """
-    evtsGen(time,XT)
+    HitCells(times)
 
-    Function that calculates signal height for each SiPM cell and adds optical crosstalk events.
+    Function that generates the cell IDs for the corresponding times.
 
     Parameters
     ----------
     time : np.ndarray
         Array containing the time at which SiPM cells are fired
-    XT : double
-        Value of optical crosstalk probability
 
     Returns
     -------
-    evtTimes : np.ndarray(int32)
-            Array containing the time at wich SiPM cells are fired, including xt events (sorted)
-    sigH : np.ndarray(float32)
-            Array containing the pulse height of each fired SiPM cell
     idx : np.ndarray(int16)
-            Array containing the unique index of the hitted cells
+            Array containing the ID of the hitted cells
     """
+    idx = frandom.randint(NCELL, times.size)
+    return(np.uint16(idx))
 
-    evtTimes = []
-    sigHtemp = []
-    if np.any(time > SIGLEN):
-        time = time[time < SIGLEN]
-    if FASTSIG and np.any(time > (INTSTART + INTGATE) * SAMPLING):
-        time = time[time < (INTSTART + INTGATE) * SAMPLING]
-    n = time.size
-    if n > 0:
-        idx = frandom.randint(NCELL, n)
-        sortfortran(time)
-        time /= SAMPLING
-        addcells = np.array((-1, 1, -CELLSIDE, CELLSIDE, -1 - CELLSIDE, -1 + CELLSIDE, 1 - CELLSIDE, 1 + CELLSIDE))
-        if FASTXT:
-            nxt = frandom.randpoiss(XT * n, 1)
-            if nxt:
-                xtidx = frandom.randint(n-1, nxt)
-                xtcells = idx[xtidx]
-                xttimes = time[xtidx]
-                xtcells += addcells[frandom.randint(7, nxt)]
-                idx = hstack((idx, xtcells))
-                time = hstack((time, xttimes))
-        else:
-            nxt = frandom.randpoiss(XT, n)
-            if np.count_nonzero(nxt):
-                xtcells = []
-                xttimes = []
-                for i in range(n):
-                    if nxt[i]:
-                        xtcells.extend(idx[i] + addcells[frandom.randint(7, nxt[i])])
-                        xttimes.extend([time[i]] * nxt[i])
-                idx = hstack((idx, xtcells))
-                time = hstack((time, xttimes))
 
-        if idx.size == len(set(idx)):
-            evtTimes = time
-            sigH = time * 0 + 1
-        else:
-            _, uCellsIdx, uCellsCounts = np.unique(idx, return_index=True, return_counts=True)
-            # Times of cells fired once
-            sTimes = time[uCellsIdx[uCellsCounts == 1]]
-            evtTimes.append(sTimes)
-            sigHtemp.append(sTimes * 0 + 1)
+def addXT(times, idx, xt):
+    """
+    addXT(times, idx, xt)
 
-            # Idx of cell fired multple times
-            mCellIdx = idx[uCellsIdx[uCellsCounts > 1]]
-            for i in range(mCellIdx.size):
-                mCellI = mCellIdx[i]    # Loop on cells fired multiple times
-                # Times of events in the same cell
-                mCellT = time[idx == mCellI]
-                sortfortran(mCellT)
-                # Delays of events consecutive to the first
-                delays = mCellT - mCellT[0]
-                # Calculate height of pulses
-                h = 1 - exp(-delays / CELLRECOVERY)
-                h[0] = 1
-                evtTimes.append(mCellT)
-                sigHtemp.append(h)
-            evtTimes = hstack(evtTimes)
-            sigH = hstack(sigHtemp)
-    else:
-        # If signal has 0 pe and 0 dcr pass an empty array
-        evtTimes = np.empty(0)
-        sigH = np.empty(0)
+    Function that generates the times and cell IDs for the XT events and adds them to the list.
 
-    return(np.int32(evtTimes), np.float32(sigH))
+    Parameters
+    ----------
+    times : np.ndarray
+        Array containing the time at which SiPM cells are fired
+    idx : np.ndarray
+        Array containing the ID of each fired cell
+    xt : double
+        Value (probability) of XT events
+
+    Returns
+    -------
+    times : np.ndarray
+        Array containing the time at which SiPM cells are fired
+    idx : np.ndarray(int16)
+            Array containing the ID of the hitted cells
+    """
+    if not args.noxt:
+        niter = 3
+        xtgen = list(idx)
+        xtgent = list(times)
+        neighbour = [1, -1, CELLSIDE, -CELLSIDE, 1+CELLSIDE, 1-CELLSIDE, -1+CELLSIDE, -1-CELLSIDE]
+
+        for i in range(niter):
+            temp = []
+            tempt = []
+            nxt = frandom.randpoiss(xt, len(xtgen))
+            for j in range(len(xtgen)):
+                for k in range(nxt[j]):
+                    choose = frandom.randint(7, 1)[0]
+                    temp.append(xtgen[j] + neighbour[choose])
+                    tempt.append(xtgent[j])
+            if len(temp) == 0:
+                break
+            xtgen = temp
+            xtgent = tempt
+            idx = hstack((idx, temp))
+            times = hstack((times, tempt))
+    return(times, idx)
+
+
+def addAP(times, h, ap):
+    """
+    addAP(times, idx, ap)
+
+    Function that generates the times and heights for the AP events and adds them to the list.
+
+    Parameters
+    ----------
+    times : np.ndarray
+        Array containing the time at which SiPM cells are fired
+    h : np.ndarray
+        Array containing the signal height of each fired cell
+    ap : double
+        Value (probability) of AP events
+
+    Returns
+    -------
+    times : np.ndarray
+        Array containing the time at which SiPM cells are fired
+    h : np.ndarray
+            Array containing the signal height of the hitted cells
+    """
+    temp = []
+    temph = []
+    nap = frandom.randpoiss(ap, times.size)
+    for i, t in enumerate(times):
+        for j in range(nap[i]):
+            delay = frandom.randexp(TAUAPFAST, 1)[0] + frandom.randexp(TAUAPSLOW, 1)[0]
+            height = 1 - exp(-delay / CELLRECOVERY)
+            temp.append(t + delay)
+            temph.append(height)
+    if len(temp):
+        times = hstack((times, temp))
+        h = hstack((h, temph))
+    return(times, h)
+
+
+def SiPMEventAction(times, idx):
+    h = times * 0 + 1
+    if not idx.size == len(set(idx)):
+        _, uniqindex, uniqcts = np.unique(idx, return_index=True, return_counts=True)
+        for i in range(uniqcts.size):
+            if uniqcts[i] > 1:
+                midx = idx[uniqindex[i]]
+                mtimes = times[idx == midx]
+                htemp = 1 - exp(-np.diff(mtimes) / CELLRECOVERY)
+                h[i] = 1
+                h[i + 1: i + 1 + htemp.size] = htemp
+                i += uniqcts[i]
+    return h
 
 
 ### GENERATION OF SIGNALS SHAPES FAST ###
+def SiPMSignalAction(times, sigH, SNR, BASESPREAD):
+    """
+    signalGen(times,sigH,SNR,BASESPREAD)
+
+    Function that passes signal height and times to the main function that
+    generates single signals. Also adds noise.
+
+    Parameters
+    ----------
+    times : np.ndarray(int32)
+    Array containing the time at wich SiPM cells are fired, including xt events (sorted)
+    sigH : np.ndarray(float32)
+    Array containing the pulse height of each fired SiPM cell
+    SNR : double
+    The signal to noise ratio of the noise to add
+    BASESPREAD : double
+    Sigma of the value to add as baseline
+
+    Returns
+    --------
+    signal : np.ndarray
+    Array containing the generated SiPM signal
+    """
+    baseline = 0
+    signal = frandom.randn(baseline, SNR, SIGPTS)    # Start with gaussian noise
+    if times.size:
+        sigH = sigH[times < SIGLEN]
+        times = np.uint32(times[times < SIGLEN] / SAMPLING)
+        gainvars = frandom.randn(1, CCGV, times.size)    # Each signal has a ccgv
+        for i in range(times.size):                      # Generate signals and sum them
+            signal += PulseCPU(times[i], sigH[i], gainvars[i])
+    return signal
+
+
 if args.signal is None:  # If generating signals fast (default)
     x = np.arange(0, SIGPTS)
-# Define the model of my signal (calculate it only once)
-    signalmodel = signalgenfortran(0, 1, TFALL, TRISE, SIGPTS, 1)
+    # Define the model of my signal (calculate it only once)
+    signalmodel = signalgenfortran(0, 1, TFALL / SAMPLING, TRISE / SAMPLING, SIGPTS, 1)
 
-    def SiPMSignalAction(times, sigH, SNR, BASESPREAD):
-        """
-        signalGen(times,sigH,SNR,BASESPREAD)
 
-        Function that passes signal height and times to the main function that
-        generates single signals. Also adds noise.
-
-        Parameters
-        ----------
-        times : np.ndarray(int32)
-                Array containing the time at wich SiPM cells are fired, including xt events (sorted)
-        sigH : np.ndarray(float32)
-                Array containing the pulse height of each fired SiPM cell
-        SNR : double
-                The signal to noise ratio of the noise to add
-        BASESPREAD : double
-                Sigma of the value to add as baseline
-
-        Returns
-        --------
-        signal : np.ndarray
-                Array containing the generated SiPM signal
-        """
-        baseline = random.gauss(0, BASESPREAD)  # Add a baseline
-        signal = frandom.randn(baseline, SNR, SIGPTS)    # Start with gaussian noise
-        gainvars = frandom.randn(1, CCGV, times.size)    # Each signal has a ccgv
-        naps = frandom.randpoiss(AP, times.size)
-        for i in range(times.size):   # Generate signals and sum them
-            signal += PulseCPU(times[i], sigH[i], gainvars[i], naps[i])
-        return signal
-
-    def PulseCPU(t, h, gainvar, nap):
+    def PulseCPU(t, h, gainvar):
         """
         PulseCPU(t,h)
 
@@ -184,8 +210,6 @@ if args.signal is None:  # If generating signals fast (default)
                 The relative pulse height of the cell signal
         gainvar : float32
                 Value of cell to cell gain variation for this signal
-        nap : int32
-                Number of afterpulses in this signal
 
 
         Returns
@@ -195,16 +219,6 @@ if args.signal is None:  # If generating signals fast (default)
         """
 
         sig = rollfortran(signalmodel, t, gainvar, h)   # Move the model signal
-        if nap:
-            for _ in range(nap):
-                # APs have a time delay exponential distribution
-                apdel = frandom.randexp(TAUAPFAST, 1) + frandom.randexp(TAUAPSLOW, 1)
-                tap = np.int32(apdel / SAMPLING + t)
-                if tap < SIGPTS:
-                    # Generate ap signal height as an RC circuit
-                    hap = 1 - exp(-apdel / CELLRECOVERY)
-                    sap = rollfortran(signalmodel, tap, gainvar, hap)
-                    sig += sap       # Add each ap
         return sig
 
 
@@ -215,9 +229,27 @@ else:								# Recalculate the signal each time
     if args.device == 'gpu':
         from libs.libGPU import *   # Cpu for low light and cpu for high light
 
+
+def signalAnalysis(signal, intstart, intgate, threshld):
+    sigingate = signal[intstart:intstart + intgate]
+
+    peak = sigingate.max()
+    if peak > threshld:
+        integral = sigingate.sum() * SAMPLING
+        toa = (sigingate > threshld).argmax() * SAMPLING
+        tot = np.count_nonzero(sigingate > threshld) * SAMPLING
+        top = (sigingate).argmax() * SAMPLING
+    else:
+        peak = -1
+        integral = -1
+        toa = -1
+        tot = -1
+        top = -1
+    return peak, integral, toa, tot, top
+
+
+
 ### SOME STATISCTICS AT END OF SCRIPT ###
-
-
 def somestats(output, realpe=None):
     """
     somestats(output)
