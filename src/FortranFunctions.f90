@@ -1,3 +1,18 @@
+!---------------------------------------------------------------------------
+!> @brief Generation of SiPM signal.
+!> Generation of SiPM signal given starting time, signal shape and noise values.
+!> Computes: @f$e^{-frac{t}{t_f}}-e^{-{t}{t_r}}@f$
+!
+!
+!> @param t Time position of the signal
+!> @param tr Rising time of the signal shape
+!> @param tf Falling time of the signal shape
+!> @param h  Relative signal height
+!> @param sigpts Number of samples
+!> @param gvar Multiplicative factor accounting for gain variation
+!
+!> @param s: Signal
+!---------------------------------------------------------------------------
 subroutine signalgenfortran(s, t, h, tf, tr, sigpts, gvar)
   implicit none
   integer(4)  :: t, sigpts, i
@@ -6,14 +21,14 @@ subroutine signalgenfortran(s, t, h, tf, tr, sigpts, gvar)
 !f2py intent(out) s
 
   s = 0.
-  forall (i = 1 : min(sigpts - t, int(10 * tf - t)))
+  forall (i = 1 : sigpts - t)
     s(i + t) = exp(-i / tf) - exp(-i / tr)
   end forall
   s = gvar * h * s
 end subroutine signalgenfortran
 
 
-subroutine rollfortran(out, vect, t, gvar, h, npt)
+subroutine rollfortran(out, vect, t, h, npt)
   implicit none
   integer(4)     :: t, npt
   real(4)        :: gvar, h, vect(npt), out(npt)
@@ -23,15 +38,28 @@ subroutine rollfortran(out, vect, t, gvar, h, npt)
 
   out = cshift(vect, -t, dim=1)
   out(1 : t) = 0
-  out = gvar * h * out
+  out = h * out
 end subroutine rollfortran
 
 
+!----------------------------------------------------------------------
+!> @author
+!> Edoardo Proserpio
+!> @brief F2PY extension for Python. Random arrays generation in Fortran
+!-----------------------------------------------------------------------
 module frandom
   implicit none
   real(4), parameter, private  :: pi2 = 6.28318530718E+00
 contains
 
+  !-----------------------------------------------------------
+  !> @brief Generation of random integers in range [0 - sup].
+  !
+  !> @param sup Superior limit for random generation
+  !> @param n Number of elements to generate
+  !
+  !> @param out
+  !----------------------------------------------------------
 subroutine randint(out, sup, n)
   implicit none
   integer(4)     :: sup, n, out(n)
@@ -44,6 +72,15 @@ subroutine randint(out, sup, n)
 end subroutine randint
 
 
+!-------------------------------------------------------------------------
+!> @brief Generation of gaussian random values using Box-Muller transform.
+!
+!> @param mu Mean value of gaussian distribution
+!> @param sigma Standard deviation of gaussian distribution
+!> @param n Number of elements to generate
+!
+!> @param out
+!-------------------------------------------------------------------------
 subroutine randn(out, mu, sigma, n)
   implicit none
   integer(4)          :: n
@@ -54,14 +91,20 @@ subroutine randn(out, mu, sigma, n)
   call random_number(out)
   call random_number(temp)
 
-  if (any(out .lt. tiny(out))) then
-    where (out .lt. tiny(out)) out = tiny(out)
-  end if
+  where (out .lt. tiny(out)) out = tiny(out)
 
   out = sqrt( -2.0E+00 * log(out)) * cos(pi2 * temp) * sigma + mu
 end subroutine randn
 
 
+!------------------------------------------------------
+!> @brief Generation of poissonian random values.
+!
+!> @param mu Mean value of poissonian distribution
+!> @param n Number of elements to generate
+!
+!> @param out
+!-------------------------------------------------------
 subroutine randpoiss(out, mu, n)
   implicit none
   integer(4)     :: n, out(n),i
@@ -87,6 +130,14 @@ subroutine randpoiss(out, mu, n)
 end subroutine randpoiss
 
 
+!-------------------------------------------------------
+!> @brief Generation of exponential random values.
+!
+!> @param mu Mean value of exponential distribution
+!> @param n Number of elements to generate
+!
+!> @param out
+!--------------------------------------------------------
 subroutine randexp(out, mu, n)
   implicit none
   integer(4)   :: n
@@ -95,13 +146,18 @@ subroutine randexp(out, mu, n)
 !f2py intent(out) out
 
   call random_number(out)
-  out = log(out)
-  out = -out * mu
+  out = -log(out) * mu
 end subroutine randexp
 
 end module frandom
 
 
+!-------------------------------------------------------
+!> @brief Array sorting done in Fortran
+!
+!> @param array Array to be sorted
+!> @param last Number of elements in the array
+!--------------------------------------------------------
 subroutine sortfortran(array,last)
   implicit none
   integer(4)       :: i, j, left, right, last

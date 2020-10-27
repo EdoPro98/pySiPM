@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['sampling_62',['SAMPLING',['../namespacevariables.html#a6e7a4786a2021aa485f1e7ccea6daac5',1,'variables']]],
+  ['savefile_63',['SaveFile',['../namespacelib.html#ac1791d11a095959c5e306b5fc727d094',1,'lib']]],
+  ['savewaves_64',['SaveWaves',['../namespacelib.html#af2fc0ac533597af557407d37902cdc49',1,'lib']]],
+  ['siglen_65',['SIGLEN',['../namespacevariables.html#a7547d0331d0e4f42126299d4fe85cd52',1,'variables']]],
+  ['signalanalysis_66',['signalAnalysis',['../namespacelib.html#af0d2381286151e767b908961457f1f54',1,'lib']]],
+  ['signalanalysisfortran_67',['signalanalysisfortran',['../_fortran_functions_8f90.html#ae16e89e62508c9f5fe53a9b646d18130',1,'FortranFunctions.f90']]],
+  ['signalgenfortran_68',['signalgenfortran',['../_fortran_functions_8f90.html#a8cada1cd48629cb89ab1bdac3a6d6481',1,'FortranFunctions.f90']]],
+  ['signalmodel_69',['signalmodel',['../namespacelib.html#a474dee6130f5d04c01b4cae4475ac8ab',1,'lib']]],
+  ['signalshapegpu_70',['signalShapeGPU',['../namespacelib_g_p_u.html#a59dda23dab4f8cdac23c0cf746ad302f',1,'libGPU']]],
+  ['sigplot_71',['sigPlot',['../namespacelib.html#a5b7fb9c244a8faf479618c130a01bd44',1,'lib']]],
+  ['sigpts_72',['SIGPTS',['../namespacevariables.html#a0a958f8ac708ff8a66693e4e8c206dee',1,'variables']]],
+  ['sipm_73',['SiPM',['../namespacemain.html#a5a4fd8e97fabbc34370cc05f41082983',1,'main']]],
+  ['sipmeventaction_74',['SiPMEventAction',['../namespacelib.html#ae6376b4c935fad6bdd9255cdbc92e00b',1,'lib']]],
+  ['sipmsignalaction_75',['SiPMSignalAction',['../namespacelib.html#afb486e4454d4d7fdebaab37f3aed3cf8',1,'lib.SiPMSignalAction()'],['../namespacelib_g_p_u.html#abfba6285e8f27d69664c52fddb08c358',1,'libGPU.SiPMSignalAction()']]],
+  ['size_76',['SIZE',['../namespacevariables.html#ad1828cb4162f31b7d7a161ed41dde155',1,'variables']]],
+  ['snr_77',['SNR',['../namespacevariables.html#a8a8f2135b39eb08ca38ed41788c8ad11',1,'variables']]],
+  ['somestats_78',['somestats',['../namespacelib.html#a8b73eb3ac209e7c6d7f8754ff3131fb2',1,'lib']]],
+  ['sortfortran_79',['sortfortran',['../_fortran_functions_8f90.html#afe2ff0e3d4fd1089a3d79dab42079efc',1,'FortranFunctions.f90']]],
+  ['stacklevel_80',['stacklevel',['../namespacevariables.html#accd4cbedd30d1ba5a8d02c5c6cf5f261',1,'variables']]],
+  ['stdout_81',['stdout',['../namespacevariables.html#ab7a290365eee9ebc7980500842de8b28',1,'variables']]]
+];

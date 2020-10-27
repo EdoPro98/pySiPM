@@ -1,0 +1,61 @@
+\hypertarget{namespacemain}{}\doxysection{main Namespace Reference}
+\label{namespacemain}\index{main@{main}}
+
+
+File containing the main function used to simulate Si\+PM events.  
+
+
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespacemain_a5a4fd8e97fabbc34370cc05f41082983}{Si\+PM}} (times, other=None)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+File containing the main function used to simulate Si\+PM events. 
+
+Author\+: Edoardo Proserpio Email\+: \href{mailto:eproserpio@studenti.uninsubria.it}{\texttt{ eproserpio@studenti.\+uninsubria.\+it}} \href{mailto:edoardo.proserpio@gmail.com}{\texttt{ edoardo.\+proserpio@gmail.\+com}} 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespacemain_a5a4fd8e97fabbc34370cc05f41082983}\label{namespacemain_a5a4fd8e97fabbc34370cc05f41082983}} 
+\index{main@{main}!SiPM@{SiPM}}
+\index{SiPM@{SiPM}!main@{main}}
+\doxysubsubsection{\texorpdfstring{SiPM()}{SiPM()}}
+{\footnotesize\ttfamily def main.\+Si\+PM (\begin{DoxyParamCaption}\item[{}]{times,  }\item[{}]{other = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}SiPM(times,other)
+
+Function that calls all the procedures defined in libs to generate a complete SiPM event.
+
+Parameters
+-----------
+times : np.ndarray
+        This array contains the arriving time of each photon on the SiPM sensor surface.
+        This array is the input of the simulation.
+
+other : tuple
+        This variable may contain other informations about the event generated.
+        It can be the event id, the arriving time inserted in the simulation
+        or the real number of photons inserted in the simulation.
+        This tuple will be copied as it is in the output.
+
+Returns
+----------
+integral : double
+        The integral of the signal calculated in the integration gate
+
+peak : double
+        The height of the signal in the integration gate
+
+tstart : double
+        The time of arrival of the signal in ns defined as the first sample over the threshld of 1.5
+
+other : tuple
+        The copy of the `other` variable given in the input
+
+signal : np.ndarray(float32)
+        If the options -W is enabled the complete SiPM signal will be passed in the output.
+        Otherwise this output is None
+\end{DoxyVerb}
+ 

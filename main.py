@@ -1,9 +1,8 @@
-'''
-This file contains the main function used to simulate SiPM events.
+"""!File containing the main function used to simulate SiPM events.
 
 Author: Edoardo Proserpio
 Email: eproserpio@studenti.uninsubria.it edoardo.proserpio@gmail.com
-'''
+"""
 # Function of simulation
 from libs.lib import *
 from libs.FortranFunctions import signalanalysisfortran
@@ -46,16 +45,13 @@ def SiPM(times, other=None):
             Otherwise this output is None
     """
 
-    times = np.float32(times)
     # Generate DCR events (times)
     if not args.nodcr:
         dcrTime = addDCR(DCR)
-        if dcrTime.size:
-            times = hstack((times, dcrTime))
-    if times.size:
-        sortfortran(times)
+        if dcrTime:
+            times.extend(dcrTime)
     # Calculate idx of hitted cells
-    idx = HitCells(times)
+    idx = HitCells(len(times))
     # Add XT events
     times, idx = addXT(times, idx, XT)
     # Calculate signal height of each cell
@@ -66,7 +62,6 @@ def SiPM(times, other=None):
     signal = SiPMSignalAction(times, sigH, SNR, BASESPREAD)
 
     # # Select signal in the integration gate
-    signalInGate = signal[INTSTART:INTSTART + INTGATE]
     integral, peak, tstart, tovert, tpeak = signalAnalysis(signal, INTSTART, INTGATE, THRESHOLD)
     if args.Graphics:
         if not args.signal:
@@ -74,11 +69,11 @@ def SiPM(times, other=None):
         elif args.device == 'cpu':
             dev = 'cpu'
         elif args.device == 'gpu':
-            if (times.size < CPUTHRESHOLD) | (times.size > GPUMAX):
+            if (len(times) < CPUTHRESHOLD) | (len(times) > GPUMAX):
                 dev = 'gpu(cpu)'
             else:
                 dev = 'gpu'
-        sigPlot(signal, times, dcrTime, dev)
+        sigPlot(signal, len(times), len(dcrTime), dev)
     if not args.wavedump:
         signal = None
     return(integral, peak, tstart, tovert, tpeak, other, signal)
