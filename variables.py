@@ -19,7 +19,7 @@ import uproot
 from datetime import datetime
 from matplotlib.ticker import MaxNLocator
 from numpy import cumsum, exp, hstack, sort, unique
-from numpy.random import choice, exponential, poisson, randint
+from numpy.random import randint, poisson, normal
 
 if importlib.util.find_spec('cupy'):
     import cupy as cp
@@ -31,50 +31,43 @@ plt.rc('lines', antialiased=False)
 warnings.simplefilter('always', DeprecationWarning)
 warnings.simplefilter('always', ImportWarning)
 
-
-###############################################################################
-##################################>>>  VARIABLES DEFINITIONS  <<<##############
-###############################################################################
-global SIGLEN	   	## Length of signal in ns
-global SAMPLING		## Samlping time in ns
-global SIGPTS		## Total number of points in signal
-global NCELL		## Total number of cells in SiPM matrix
-global CELLSIDE		## Number of cells in the side of SiPM matrix
-global DCR			## Dark Count Rate in Hz
-global XT			## Optical Cross Talk probability in %
-global TFALL		## Falling time of SiPM signal in ns
-global TRISE		## Rising time of SiPM signal in ns
-global CELLRECOVERY ## Cell recovery time in ns
-global INTSTART		## Start of integration gate in ns
-global INTGATE		## Integration gate lenght in ns
-global PREG			## Lenght of pre-gate in ns
-global SNR			## Signal to noise ratio in dB
-global BASESPREAD   ## Baseline spread (sigma)
-global CCGV			## Cell to cell gain variation (sigma)
-global NORMPE		## Normalization of peack height (1 pe  => peak  =  1)
-global AP			## After pulsing probability in %
-global TAUAPFAST    ## After pulses time distribution decay (fast) in ns
-global TAUAPSLOW    ## After pulses time distribution decay (slow) in ns
-global CPUTHRESHOLD ## If there are more pe than this value swich to GPU
-global GPUMAX		## If there are more pe than this value swich back to CPU
+global SIGLEN  # Length of signal in ns
+global SAMPLING  # Samlping time in ns
+global SIGPTS  # Total number of points in signal
+global NCELL  # Total number of cells in SiPM matrix
+global CELLSIDE  # Number of cells in the side of SiPM matrix
+global DCR  # Dark Count Rate in Hz
+global XT  # Optical Cross Talk probability in %
+global TFALL  # Falling time of SiPM signal in ns
+global TRISE  # Rising time of SiPM signal in ns
+global CELLRECOVERY  # Cell recovery time in ns
+global INTSTART  # Start of integration gate in ns
+global INTGATE  # Integration gate lenght in ns
+global PREG  # Lenght of pre-gate in ns
+global SNR  # Signal to noise ratio in dB
+global BASESPREAD  # Baseline spread (sigma)
+global CCGV  # Cell to cell gain variation (sigma)
+global NORMPE  # Normalization of peack height (1 pe  => peak  =  1)
+global AP  # After pulsing probability in %
+global TAUAPFAST  # After pulses time distribution decay (fast) in ns
+global TAUAPSLOW  # After pulses time distribution decay (slow) in ns
+global CPUTHRESHOLD  # If there are more pe than this value swich to GPU
+global GPUMAX  # If there are more pe than this value swich back to CPU
 
 
-###############################################################################
-##################################>>>   EDITABLE VARIABLES   <<<###############
-###############################################################################
 # Signal parameters
 SIGLEN = 500        # in ns
 SAMPLING = 0.1      # in ns
 
 # SiPM parameters
 SIZE = 1			# in mm
-CELLSIZE = 25		# in um
+CELLSIZE = 10		# in um
 DCR = 200e3			# in Hz
-XT = 0.01			# in %
-AP = 0.03			# in %
+XT = 0.02			# in %
+AP = 0.01			# in %
 TFALL = 50			# in ns
 TRISE = 1			# in ns
-CELLRECOVERY = 20   # in ns
+CELLRECOVERY = 30   # in ns
 TAUAPFAST = 15		# in ns
 TAUAPSLOW = 85		# in ns
 SNR = 30			# in dB single pe peack height (sigma) Off at the moment
@@ -82,22 +75,18 @@ BASESPREAD = 0.00
 CCGV = 0.05			# relative to single pe peack height (sigma)
 
 # Trigger parameters
-INTSTART = 5		# in ns
+INTSTART = 2		# in ns
 INTGATE = 300		# in ns
 PREG = 0			# in ns
-THRESHOLD = 0.5     # in pe
+THRESHOLD = 1.5     # in pe
 
 # Simulation parameters
-FASTDCR = False
-FASTXT = False
 FASTSIG = True
 CPUTHRESHOLD = 100
 GPUMAX = 2000
 
 
-###############################################################################
-##########################>>> ARGUMENTSS PARSER  <<<###########################
-###############################################################################
+# ARGUMENTSS PARSER
 description = '''Software for SiPM simulation'''
 epilog = '''Try -g -G to get started :)\
 \n\nDeveloped for IDEA Dual Readout Calorimeter collaboration\
@@ -135,7 +124,9 @@ parser.add_argument('-SIG', '--signal', action='count',
 parser.add_argument('-f', '--fname', nargs='?', type=str,
                     help='Configuration file', metavar='filename.txt')
 parser.add_argument('-W', '--wavedump', nargs='?', type=str,
-                    help='Output Digitized Waveforms on hdf5 file', metavar='groupname')
+                    help='Output Digitized Waveforms on hdf5 file', metavar='filename')
+# parser.add_argument('-T', '--txtfile', nargs='?', type=str,
+#                     help='Input of txt file', metavar='groupname')
 
 args = parser.parse_args()
 
@@ -150,16 +141,6 @@ else:
 
 if args.quiet:
     sys.stdout = open('/dev/null', 'w')
-
-if args.nodcr:		# Set DCR rate to 0
-    DCR = 0
-    FASTDCR = True
-
-if args.noxt:		# Set XT rate to 0
-    XT = 0
-
-if args.noap:		# Set AP rate to 0
-    AP = 0
 
 if args.signal:		# Refer to libs/lib file for a detailed description
     FASTSIG = False
@@ -209,3 +190,6 @@ PREG = int(INTSTART - PREG / SAMPLING)
 PEAKHEIGHT = -exp(TFALL*np.log(TRISE/TFALL)/(TFALL - TRISE)) + exp(TRISE*np.log(TRISE/TFALL)/(TFALL - TRISE))
 THRESHOLD = THRESHOLD * PEAKHEIGHT
 SNR = PEAKHEIGHT * 10**(-SNR / 20)
+
+TF = TFALL / SAMPLING
+TR = TRISE / SAMPLING

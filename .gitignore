@@ -5,14 +5,10 @@
 *.so
 *.o
 *.s
-/docs/make.bat
-/docs/Makefile
-/docs/source/
-/docs/build/doctrees/
 *.pyc
 *.hdf5
 *.npy
 *.npz
-/Visual
 test.py
 .ropeproject
+/tests

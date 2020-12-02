@@ -1,11 +1,9 @@
 """In this file I define all the functions I will use in the main file of simulation."""
-# EDITING THIS FILE MAY SERIOUSLY COMPROMISE SIMULATION BEHAVIOUR
-from libs.FortranFunctions import rollfortran, signalgenfortran, sortfortran
-from libs.FortranFunctions import frandom
 from variables import *
+from libs.FortranFunctions import fsignal
 
 
-def PulseCPU(t, h, gainvar):
+def PulseCPU(t, h):
     """! @brief Generation of single cell signals."""
     """!
     Function that generates the signal from a single SiPM cell.
@@ -19,5 +17,6 @@ def PulseCPU(t, h, gainvar):
 
     @return s: Array containing the generated cell signal
     """
-    sig = signalgenfortran(t, h, TFALL / SAMPLING, TRISE / SAMPLING, SIGPTS, gainvar)    # Calculate signal
+    # Calculate signal
+    sig = fsignal(t, TF, TR, h, SIGPTS)
     return sig

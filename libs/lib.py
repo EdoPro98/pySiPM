@@ -1,9 +1,7 @@
 """In this file I define all the functions I will use in the main file of simulation."""
-# EDITING THIS FILE MAY SERIOUSLY COMPROMISE SIMULATION BEHAVIOUR!
-
-from libs.FortranFunctions import rollfortran, signalgenfortran, sortfortran
-from libs.FortranFunctions import frandom
 from variables import *
+from libs.FortranFunctions import frandom
+from libs.FortranFunctions import froll, fsignal
 
 
 def addDCR(rate):
@@ -17,14 +15,19 @@ def addDCR(rate):
     @param rate:        Dark counts rate un Hz.
 
     @return dcrTime:    List containing times of DCR events in ns.
+    @return nDcr:       Number of DCR events generated
     """
     dcrTime = []
     last = 0
-    while last < SIGLEN:  # Generate from exponential distribution of delays
-        last = frandom.randexp(1e9 / rate, 1)
-        dcrTime.append(last.item())
+    # Generate using exponential distribution of delays
+    while last < SIGLEN:
+        last = frandom.exponential(1e9 / rate, 1).item()
+        dcrTime.append(last)
+
+    # Delete last one (exceeding SIGLEN)
     dcrTime.pop(-1)
-    return dcrTime
+    nDcr = len(dcrTime)
+    return dcrTime, nDcr
 
 
 def HitCells(n):
@@ -38,7 +41,8 @@ def HitCells(n):
     @param n:     Number of photoelectrons that have to be simulated.
     @return idx:    List containing the ID of each hitted cell.
     """
-    idx = list(frandom.randint(NCELL, n))
+    # At the moment generation is uniform
+    idx = frandom.integer(NCELL, n).tolist()
     return idx
 
 
@@ -61,17 +65,22 @@ def addXT(times, idx, xt):
     @return idx:    List containing the ID of the hitted cells including
                     XT events.
     """
-    if not args.noxt:
-        neighbour = [1, -1, CELLSIDE, -CELLSIDE, 1+CELLSIDE, 1-CELLSIDE, -1+CELLSIDE, -1-CELLSIDE]
+    neighbour = (1, -1, CELLSIDE, -CELLSIDE, 1+CELLSIDE, 1-CELLSIDE,
+     -1+CELLSIDE, -1-CELLSIDE)
+    npe = len(times)
+    nXt = 0
+    i = 0
 
-        for i in range(len(idx)):
-            nxt = frandom.randpoiss(xt, 1)[0]
-            for j in range(nxt):
-                choice = frandom.randint(7, 1)[0]
-                idx.append(idx[i] + neighbour[choice])
-                times.append(times[i])
+    while i < npe:
+        nxt = frandom.poisson(xt, 1).item()
+        nXt += nxt
+        npe += nxt
+        for j in range(nxt):
+            idx.append(idx[i] + random.choice(neighbour))
+            times.append(times[i])
+        i += 1
 
-    return(times, idx)
+    return times, idx, nXt
 
 
 def addAP(times, h, ap):
@@ -92,47 +101,77 @@ def addAP(times, h, ap):
 
     @return times:  List containing the time at which SiPM cells are fired,
                     including AP events.
-    @return h:      List containing the relative signal height of each hitted cell.
+    @return h:      List containing the relative signal height of each
+                    hitted cell.
     """
+    npe = len(times)
+    nAp = 0
+    i = 0
 
-    for t in times:
-        nap = frandom.randpoiss(ap, 1)[0]
-        for j in range(nap):
-            delay = frandom.randexp(TAUAPFAST, 1)[0] + frandom.randexp(TAUAPSLOW, 1)[0]
-            height = 1 - exp(-delay / CELLRECOVERY)
-            times.append(t + delay)
-            h.append(height)
-    return(times, h)
+    while i < npe:
+        nap = frandom.poisson(ap, 1).item()
+        if nap:
+            delays = frandom.exponential(TAUAPFAST, nap) + frandom.exponential(TAUAPSLOW, nap)
+            heights = 1 - exp(-delays / CELLRECOVERY)
+            aptimes = times[i] + delays
+
+            mask = aptimes < SIGLEN
+            times.extend(aptimes[mask])
+            h.extend(heights[mask])
+
+            # Count only ap inside time window
+            npe += np.count_nonzero(mask)
+            nAp += np.count_nonzero(mask)
+        i += 1
+    return times, h, nAp
 
 
 def SiPMEventAction(times, idx):
     """!@brief Calculates relative signal height for each photoelectron."""
     """!
-    Since a SiPM cell may be hitted multiple times, recovery time has to be considered.
+    Since a SiPM cell may be hitted multiple times, recovery time has to be
+    considered.
     If all cell IDs are different all signal heights are left unchanged with a
-    value of 1, else if an ID appears multiple times then the first (in time) hit
-    gives a signal height of 1 and the following will have a lower relative height.
-    The relative signal height, after a @f$\Delta_t@f$ time from the previous hit,
-    is calculated supposing that each SiPM cell recovers as an RC circuit:
+    value of 1, else if an ID appears multiple times then the first (in time)
+    hit gives a signal height of 1 and the following will have a lower relative
+    height.
+    The relative signal height, after a @f$\Delta_t@f$ time from the previous
+    hit, is calculated supposing that each SiPM cell recovers as an RC circuit:
     @f[h(\Delta_t)=1-e^{-\frac{t}{\tau}}@f]
 
     @param times:   List containing the time of all events that have generated
                     an avalanche in the SiPM cells.
     @param idx:     List containing the corresponding cell IDs of the events.
-    @return h:      List containing the relative signal height of each avalanche.
+    @return h:      List containing the relative signal height of each
+                    avalanche.
     """
-    h = [1] * len(times)
-    times = np.array(times, dtype='float32', copy=False)
-    if not len(idx) == len(set(idx)):
-        _, uniqindex, uniqcts = np.unique(idx, return_index=True, return_counts=True)
-        for i in range(uniqcts.size):
-            if uniqcts[i] > 1:
-                midx = idx[uniqindex[i]]
-                mtimes = times[idx == midx]
-                htemp = 1 - exp(-np.diff(mtimes) / CELLRECOVERY)
-                h[i + 1: i + 1 + htemp.size] = htemp
-                i += uniqcts[i]
-    return h
+
+    # Converting to Numpy arrays
+    times = np.array(times, dtype=np.float32, copy=False)
+    times = times[times < SIGLEN]
+    # Start with all signals with height 1
+    h = np.ones_like(times)
+
+    # If no repeated hits skip
+    if len(idx) != len(set(idx)):
+        idx = np.array(idx, dtype=np.int32, copy=False)
+
+        # Sorting times and theyr idx
+        idxsort = np.argsort(times)
+        times = times[idxsort]
+        idx = idx[idxsort]
+
+        _, uniqindex, uniqcts = np.unique(idx, return_index=True,
+         return_counts=True)
+        midx = uniqindex[uniqcts > 1]
+
+        for m in midx:
+            mtimes = times[idx == idx[m]]
+            htemp = 1 - exp(-np.diff(mtimes, prepend=0) / CELLRECOVERY)
+            htemp[0] = 1
+            h[idx == idx[m]] = htemp
+
+    return times.tolist(), h.tolist()
 
 
 def SiPMSignalAction(times, sigH, snr=SNR, basespread=0):
@@ -150,29 +189,31 @@ def SiPMSignalAction(times, sigH, snr=SNR, basespread=0):
     @param basespread:  Sigma of the value to add as baseline spread.
     @return signal:     Array containing the complete sigitized SiPM signal.
     """
-    times = np.array(times, dtype='float32', copy=False)
-    sigH = np.array(sigH, dtype='float32', copy=False)
-    signal = frandom.randn(0, snr, SIGPTS)    # Start with gaussian noise
+    # Start with gaussian noise
+    signal = frandom.normal(basespread, snr, SIGPTS)
+
+    times = np.array(times, dtype=np.float32, copy=False)
     if times.size:
-        sigH = sigH[times < SIGLEN]
-        times = np.uint32(times[times < SIGLEN] / SAMPLING)
-        gainvars = frandom.randn(1, CCGV, times.size)    # Each signal has a ccgv
-        for i in range(times.size):                      # Generate signals and sum them
-            signal += PulseCPU(times[i], sigH[i], gainvars[i])
+        sigH = np.array(sigH, dtype=np.float32, copy=False)
+        # Convert times in units of samples
+        times = np.uint32(times / SAMPLING)
+        # Each signal has a ccgv
+        gainvars = frandom.normal(1, CCGV, times.size)
+        sigH = sigH * gainvars
+        # Generate signals and sum them
+        for i in range(times.size):
+            signal += PulseCPU(times[i], sigH[i])
     return signal
+
 
 # Fast generation of signals
 if args.signal is None:
-    ##@cond
-    x = np.arange(0, SIGPTS)
-    ##@endcond
-
     ## @var numpy.ndarray $signalmodel
     ## Array containing the signal shape of the SiPM intended as the ideal
-    ## signal generated by a signle photoelectron.
-    signalmodel = signalgenfortran(0, 1, TFALL / SAMPLING, TRISE / SAMPLING, SIGPTS, 1)
+    ## signal generated by a signle photoelectron at time 0 ns.
+    signalmodel = fsignal(0, TF, TR, 1, SIGPTS)
 
-    def PulseCPU(t, h, gainvar):
+    def PulseCPU(t, h):
         """! @brief Generation of single cell signals."""
         """!
         Function that generates the signal from a single SiPM cell.
@@ -186,20 +227,18 @@ if args.signal is None:
 
         @return s: Array containing the generated cell signal
         """
-
         # Move the model signal and add ccgv and relative h
-        sig = rollfortran(signalmodel, t, gainvar * h)
+        sig = froll(signalmodel, t, h)
         return sig
 
-
 # Full generation of signals (for debug)
-else:
-    # Generation fully on cpu
-    if args.device == 'cpu':
-        from libs.libCPU import *
+elif args.device == 'cpu':
+    # Generation on CPU only
+    from libs.libCPU import *
+
+elif args.device == 'gpu':
     # Cpu for low light and cpu for high light
-    if args.device == 'gpu':
-        from libs.libGPU import *
+    from libs.libGPU import *
 
 
 def signalAnalysis(signal, intstart, intgate, threshold):
@@ -228,19 +267,21 @@ def signalAnalysis(signal, intstart, intgate, threshold):
     """
     sigingate = signal[intstart:intstart + intgate]
 
-    peak = -1
-    integral = -1
-    toa = -1
-    tot = -1
-    top = -1
+    test = sigingate.max()
 
-    if sigingate.max() > threshold:
-        peak = sigingate.max()
+    if test > threshold:
+        mask = sigingate > threshold
+        peak = test
         integral = sigingate.sum() * SAMPLING
-        toa = (sigingate > threshold).argmax() * SAMPLING
-        tot = np.count_nonzero(sigingate > threshold) * SAMPLING
-        top = (sigingate).argmax() * SAMPLING
-
+        toa = mask.argmax() * SAMPLING
+        tot = np.count_nonzero(mask) * SAMPLING
+        top = sigingate.argmax() * SAMPLING
+    else:
+        peak = -1
+        integral = -1
+        toa = -1
+        tot = -1
+        top = -1
     return peak, integral, toa, tot, top
 
 
@@ -280,7 +321,6 @@ def somestats(output, realpe=None):
     plt.figure()
     plt.title('Time over threshold')
     plt.hist(tovert, np.arange(tovert.min(), tovert.max(), 2*SAMPLING), color='k')
-    plt.yscale('log')
     plt.xlabel('Time over threshold [ns]')
 
     plt.figure()
@@ -290,13 +330,13 @@ def somestats(output, realpe=None):
     plt.xlabel('Peaking time [ns]')
 
     plt.figure()
-    x = np.sort(peak)
-    y = np.empty_like(x)
-    for i in range(x.size):
-        y[i] = np.count_nonzero(x > x[i])
+    x = np.linspace(-0.5, peak.max(), 5000)
+    y = x * 0
+    for i, t in enumerate(x):
+        y[i] = np.count_nonzero(peak > t)
 
-    y *= (1e-3 / y.size / (INTGATE * SAMPLING * 1e-9))
-    if peak.max() < 5:
+    y *= (1e-3 / peak.size / (INTGATE * SAMPLING * 1e-9))
+    if peak.max() < PEAKHEIGHT * 5:
         plt.hlines(DCR/1e3, x.min(), x.max(), 'k', label=f'DCR = {DCR*1e-3:.0f} kHz')
         plt.legend()
     plt.plot(x, y, '.r')
@@ -326,6 +366,7 @@ def somestats(output, realpe=None):
     plt.xlabel('Peak value measured')
     plt.ylabel('Integrated charge')
     plt.show()
+
 
 ##@cond
 drawn = [False] * nJobs
@@ -433,7 +474,7 @@ def SaveFile(fname, out, other=None):
     f['SiPMData']['ToT'].newbasket(out[:, 3])
     f['SiPMData']['ToP'].newbasket(out[:, 4])
 
-    if other.any():
+    if other is not None:
         other = np.array(other)
         f['GeometryData'] = uproot.newtree({
                 'EventId': np.int32,

@@ -30,12 +30,13 @@ def PulseGPU(t, h):
     # Number of signals to generate
     n = t.size
     # Generate matrix containing times of each fired cell
-    vect = (cp.arange(SIGPTS, dtype='int32') + cp.zeros((n, 1), dtype='int32') - t[:, None])
+    vect = (cp.arange(SIGPTS, dtype=cp.int32) + cp.zeros((n, 1), dtype=cp.int32) - t[:, None])
     # Zero before the signal
     vect[vect < 0] = 0
     # Generate random ccgv
-    gainvar = cp.random.normal(1, CCGV, (n, 1), dtype='float32')
-    h = h[:, None].astype('float32')    # Transpose array of height values
+    gainvar = cp.random.normal(1, CCGV, (n, 1), dtype=cp.float32)
+    # Transpose array of height values
+    h = h[:, None]
     # Call kernel to generate singal
     sig = cp.sum(signalShapeGPU(vect, TFALL / SAMPLING, TRISE / SAMPLING, gainvar, h), axis=0)
     # If there are afterpulses generate theyr signals
@@ -65,13 +66,13 @@ def SiPMSignalAction(times, sigH, snr, basespread):
 
     @return signal:     Array containing the complete sigitized SiPM signal.
     """
-    times = np.array(times, dtype='float32', copy=False)
-    sigH = np.array(sigH, dtype='float32', copy=False)
+    times = np.array(times, dtype=np.float32, copy=False)
+    sigH = np.array(sigH, dtype=np.float32, copy=False)
     sigH = sigH[times < SIGLEN]
-    times = np.uint32(times[times < SIGLEN] / SAMPLING)
-    signal = frandom.randn(0, SNR, SIGPTS)
+    times = (times[times < SIGLEN] / SAMPLING).astype(np.uint32)
+    signal = normal(0, SNR, SIGPTS)
     if (times.size < CPUTHRESHOLD) or (times.size > GPUMAX):
-        gainvars = frandom.randn(1, CCGV, size=times.size)   # Each signal has a ccgv
+        gainvars = normal(1, CCGV, times.size)   # Each signal has a ccgv
         for i in range(times.size):
             signal += PulseCPU(times[i], sigH[i], gainvars[i])
         return signal

@@ -14,9 +14,12 @@ if importlib.util.find_spec('cupy'):
   import cupy
   cpversion = cupy.__version__
 if importlib.util.find_spec('ROOT'):
-  from ROOT import gROOT
-  rootversion = gROOT.GetVersion()
-    
+    try:
+        from ROOT import gROOT
+        rootversion = gROOT.GetVersion()
+    except:
+        pass
+
 assert importlib.util.find_spec('numpy'), 'Numpy is needed, please install using: pip install numpy'
 assert importlib.util.find_spec('matplotlib'), 'Matplotlib is needed, please install using: pip install matplotlib'
 assert importlib.util.find_spec('h5py'), 'H5py is needed, please install using: pip install h5py'
@@ -43,6 +46,7 @@ s3='''|
 |Edoardo Proserpio
 |Massimiliano Antonello
 |Romualdo Santoro'''
+
 print(s1)
 for l in s2.splitlines():
   if l[0]=='|':

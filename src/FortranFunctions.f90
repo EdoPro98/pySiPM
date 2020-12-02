@@ -13,10 +13,12 @@
 !
 !> @param s: Signal
 !---------------------------------------------------------------------------
-subroutine signalgenfortran(s, t, h, tf, tr, sigpts, gvar)
+pure subroutine fsignal(s, t, tf, tr, h, sigpts)
   implicit none
-  integer(4)  :: t, sigpts, i
-  real(4)     :: h, gvar, tf, tr, s(sigpts)
+  integer(8),intent(in)  :: t, sigpts
+  real(8),intent(in)     :: tf, tr, h
+  real(8),intent(out)    :: s(sigpts)
+  integer(8)             :: i
 !f2py intent(in) t, h, gvar, tf, tr, sigpts
 !f2py intent(out) s
 
@@ -24,22 +26,23 @@ subroutine signalgenfortran(s, t, h, tf, tr, sigpts, gvar)
   forall (i = 1 : sigpts - t)
     s(i + t) = exp(-i / tf) - exp(-i / tr)
   end forall
-  s = gvar * h * s
-end subroutine signalgenfortran
+  s = s * h
+end subroutine fsignal
 
 
-subroutine rollfortran(out, vect, t, h, npt)
+pure subroutine froll(out, vect, t, h, npt)
   implicit none
-  integer(4)     :: t, npt
-  real(4)        :: gvar, h, vect(npt), out(npt)
-!f2py intent(in) t, gvar, h, vect
-!f2py intent(hide), depend(vect) npt = len(vect)
+  integer(8),intent(in)     :: t, npt
+  real(8),intent(in)        :: vect(npt), h
+  real(8),intent(out)       :: out(npt)
+!f2py intent(in) t, vect
+!f2py intent(hide), depend(vect) npt = vect.size
 !f2py intent(out) out
 
   out = cshift(vect, -t, dim=1)
   out(1 : t) = 0
-  out = h * out
-end subroutine rollfortran
+  out = out * h
+end subroutine froll
 
 
 !----------------------------------------------------------------------
@@ -49,7 +52,7 @@ end subroutine rollfortran
 !-----------------------------------------------------------------------
 module frandom
   implicit none
-  real(4), parameter, private  :: pi2 = 6.28318530718E+00
+  real(8), parameter, private  :: pi2 = 6.28318530718E+00
 contains
 
   !-----------------------------------------------------------
@@ -60,16 +63,16 @@ contains
   !
   !> @param out
   !----------------------------------------------------------
-subroutine randint(out, sup, n)
+subroutine integer(out, sup, n)
   implicit none
-  integer(4)     :: sup, n, out(n)
-  real(4)        :: u(n)
+  integer(8)     :: sup, n, out(n)
+  real(8)        :: u(n)
 !f2py intent(in) ncells, nsig
 !f2py intent(out) out
-
+  sup = sup + 1
   call random_number(u)
-  out = floor(sup * u) + 1
-end subroutine randint
+  out = floor(sup * u)
+end subroutine integer
 
 
 !-------------------------------------------------------------------------
@@ -81,20 +84,25 @@ end subroutine randint
 !
 !> @param out
 !-------------------------------------------------------------------------
-subroutine randn(out, mu, sigma, n)
+subroutine normal(out, mu, sigma, n)
   implicit none
-  integer(4)          :: n
-  real(4)             :: mu, sigma, out(n), temp(n)
+  integer(8)          :: n
+  real(8)             :: mu, sigma
+  real(8)             :: out(n), v(n), u(n), logs(n)
 !f2py intent(in) mu, sigma, n
 !f2py intent(out) out
 
-  call random_number(out)
-  call random_number(temp)
+  call random_number(v)
+  call random_number(u)
 
-  where (out .lt. tiny(out)) out = tiny(out)
+  where (v .lt. tiny(v)) v = tiny(v)
 
-  out = sqrt( -2.0E+00 * log(out)) * cos(pi2 * temp) * sigma + mu
-end subroutine randn
+
+  logs = log(v)
+  logs = sqrt(-2.00E0 * logs)
+
+  out = logs * cos(pi2 * u) * sigma + mu
+end subroutine normal
 
 
 !------------------------------------------------------
@@ -105,17 +113,16 @@ end subroutine randn
 !
 !> @param out
 !-------------------------------------------------------
-subroutine randpoiss(out, mu, n)
+subroutine poisson(out, mu, n)
   implicit none
-  integer(4)     :: n, out(n),i
-  real(4)        :: mu, L, p(n), u
+  integer(8)     :: n, out(n),i
+  real(8)        :: mu, L, p(n), u
 !f2py intent(in) mu, n
 !f2py intent(out) out
 
   L = exp(-mu)
-  out = 0
+  out = -1
   p = 1
-  i = 1
 
   do i=1,n
     do while(p(i) .gt. L)
@@ -125,9 +132,12 @@ subroutine randpoiss(out, mu, n)
     end do
   end do
 
-
-  out = out - 1
-end subroutine randpoiss
+  do while(any(p .gt. L))
+    where (p .gt. L) out = out + 1
+    call random_number(u)
+    p = p * u
+  end do
+end subroutine poisson
 
 
 !-------------------------------------------------------
@@ -138,16 +148,16 @@ end subroutine randpoiss
 !
 !> @param out
 !--------------------------------------------------------
-subroutine randexp(out, mu, n)
+subroutine exponential(out, mu, n)
   implicit none
-  integer(4)   :: n
-  real(4)      :: mu, out(n)
+  integer(8)   :: n
+  real(8)      :: mu, out(n)
 !f2py intent(in) mu, n
 !f2py intent(out) out
 
   call random_number(out)
   out = -log(out) * mu
-end subroutine randexp
+end subroutine exponential
 
 end module frandom
 
@@ -156,28 +166,28 @@ end module frandom
 !> @brief Array sorting done in Fortran
 !
 !> @param array Array to be sorted
-!> @param last Number of elements in the array
+!> @param n Number of elements in the array
 !--------------------------------------------------------
-subroutine sortfortran(array,last)
+subroutine fsort(array,n)
   implicit none
-  integer(4)       :: i, j, left, right, last
-  real(4)          :: array(last)
-  real(4)          :: temp, p, next
+  integer(8)       :: i, j, left, right, n
+  real(8)          :: array(n)
+  real(8)          :: temp, p, next
 !f2py intent(inout) array
-!f2py intent(hide), depend(array) last = len(array)
+!f2py intent(hide), depend(array) n = len(array)
 
-  p = 0.5 * (array(1) + array(last))
-  if (array(1) .gt. array(last)) then
-     temp = array(last)
-     array(last) = array(1)
+  p = 0.5 * (array(1) + array(n))
+  if (array(1) .gt. array(n)) then
+     temp = array(n)
+     array(n) = array(1)
      array(1) = temp
   endif
 
   left = 1
-  right = last
+  right = n
   temp = array(2)
 
-  do i = 2,last - 1
+  do i = 2,n - 1
      if (temp .lt. p) then
         do j = left, 1, -1
            if (array(j) .le. temp) exit
@@ -188,7 +198,7 @@ subroutine sortfortran(array,last)
         left = left + 1
      else
         next = array(right - 1)
-        do j = right, last
+        do j = right, n
            if (array(j) .ge. temp) exit
            array(j - 1) = array(j)
         end do
@@ -197,12 +207,12 @@ subroutine sortfortran(array,last)
         right = right - 1
      endif
   end do
-end subroutine sortfortran
+end subroutine fsort
 
 subroutine signalanalysisfortran(integral, peak, toa, tot, top, signalingate, sampling)
 
-  real(4)     :: signalingate(:), sampling
-  real(4)     :: integral, peak, toa, tot, top
+  real(8)     :: signalingate(:), sampling
+  real(8)     :: integral, peak, toa, tot, top
 !f2py intent(in) signalingate(:), sampling
 !f2py intent(out) integral, peak, toa, tot, top
 
