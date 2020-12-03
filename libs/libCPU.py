@@ -1,34 +1,22 @@
-# In this file I define all the functions I will use in the main file of simulation
-from libs.FortranFunctions import rollfortran, signalgenfortran, sortfortran
-from libs.FortranFunctions import frandom
+"""In this file I define all the functions I will use in the main file of simulation."""
 from variables import *
+from libs.FortranFunctions import fsignal
 
-###############################################################################
-##>>>   EDITING THIS FILE MAY SERIOUSLY COMPROMISE SIMULATION BEHAVIOUR   <<<##
-###############################################################################
-def PulseCPU(t, h, gainvar):
-    """
-    PulseCPU(t,h)
 
+def PulseCPU(t, h):
+    """! @brief Generation of single cell signals."""
+    """!
     Function that generates the signal from a single SiPM cell.
-    This is the "full" version that computes the signal shape on CPU by evaluating the signal shape function.
+    This is the "full" version that calculates each signal considering
+    a double exponential function.
 
-    Parameters
-    ----------
-    t : int32
-            Time at which the cell is triggered
-    h : float32
-            The relative pulse height of the cell signal
-    gainvar : float32
-            Value of cell to cell gain variation for this signal
-    nap : int32
-            Number of afterpulses in this signal
+    @param t:       Time at which the cell is triggered.
+    @param h:       The relative pulse height of the cell signal
+    @param gainvar: Value of cell to cell gain variation for this signal.
 
 
-    Returns
-    -------
-    s : np.ndarray
-            Array containing the generated cell signal
+    @return s: Array containing the generated cell signal
     """
-    sig = signalgenfortran(t, h, TFALL / SAMPLING, TRISE / SAMPLING, SIGPTS, gainvar)    # Calculate signal
+    # Calculate signal
+    sig = fsignal(t, TF, TR, h, SIGPTS)
     return sig

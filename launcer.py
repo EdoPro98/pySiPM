@@ -11,7 +11,7 @@ file called 'wavedump.py'.
 from main import *
 
 # Openig file
-fname = '../Data/BandX0/br2_seed1_timefinal.digi'
+fname = '../Data/muon_20GeV.digi'
 f = open(fname)
 print(f'Opening file: {fname}')
 lines = f.readlines()
@@ -24,7 +24,7 @@ temp = 0
 for line in lines:
     if not line.strip():
         continue
-    L = line.split()
+    L = line.split(',')
     t = np.array(L[6:], dtype='float32')
     TIMES.append(t)
     OTHER.append((np.float32(L[0]), np.float32(L[1] == 'Scin'), np.float32(L[2]), np.float32(L[3]), np.float32(L[4]), np.float32(L[5])))
@@ -43,7 +43,8 @@ del TIMES
 del OTHER
 
 # Setting up results arrays
-pool = Pool(processes=nJobs, initializer=initializeRandomPool, maxtasksperchild=16384)
+pool = Pool(processes=nJobs, initializer=initializeRandomPool,
+            maxtasksperchild=16384)
 output = np.empty(shape=(NFIB, 5), dtype='float32')
 other = np.empty(shape=(NFIB, 6), dtype='float32')
 if args.wavedump:
@@ -58,9 +59,9 @@ pool.join()
 Te = time.time()
 
 for i, r in enumerate(res.get()):
-    output[i, :] = r[:5]
-    other[i, :] = r[5]
-    signals[i, :] = r[6]
+    output[i, :] = r[0]
+    other[i, :] = r[1]
+    signals[i, :] = r[2]
 
 print('\n===> Simulation finished <===\n')
 print(f'Execution time: {(Te-Ts):.2f}s')
