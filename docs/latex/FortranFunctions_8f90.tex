@@ -1,0 +1,106 @@
+\hypertarget{FortranFunctions_8f90}{}\doxysection{/home/edo/\+Ubuntu\+Data/\+Desktop/\+S\+I\+P\+M-\/\+S\+I\+M\+U\+L\+A\+T\+I\+O\+N\+S/\+S\+I\+P\+M-\/\+Simulation\+Full/src/\+Fortran\+Functions.f90 File Reference}
+\label{FortranFunctions_8f90}\index{/home/edo/UbuntuData/Desktop/SIPM-\/SIMULATIONS/SIPM-\/SimulationFull/src/FortranFunctions.f90@{/home/edo/UbuntuData/Desktop/SIPM-\/SIMULATIONS/SIPM-\/SimulationFull/src/FortranFunctions.f90}}
+\doxysubsection*{Modules}
+\begin{DoxyCompactItemize}
+\item 
+module \mbox{\hyperlink{namespacefrandom}{frandom}}
+\begin{DoxyCompactList}\small\item\em F2\+PY extension for Python. Random arrays generation in Fortran. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions/\+Subroutines}
+\begin{DoxyCompactItemize}
+\item 
+pure subroutine \mbox{\hyperlink{FortranFunctions_8f90_a716e4fd2942370026880db408df25d2d}{fsignal}} (s, t, tf, tr, h, sigpts)
+\begin{DoxyCompactList}\small\item\em Generation of Si\+PM signal. \end{DoxyCompactList}\item 
+pure subroutine \mbox{\hyperlink{FortranFunctions_8f90_a2d99718e6db9ae5191af84b55040c709}{froll}} (out, vect, t, h, npt)
+\item 
+subroutine \mbox{\hyperlink{namespacefrandom_acf60cc17c1797f1c012b4b61d35aa552}{frandom\+::integer}} (out, sup, n)
+\begin{DoxyCompactList}\small\item\em Generation of random integers in range \mbox{[}0 -\/ sup\mbox{]}. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacefrandom_a4b868ff3f4b2328fee382df82ebb3c5a}{frandom\+::normal}} (out, mu, sigma, n)
+\begin{DoxyCompactList}\small\item\em Generation of gaussian random values using Box-\/\+Muller transform. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacefrandom_aa318f8f56b68345a9ffc00c92f8468ed}{frandom\+::poisson}} (out, mu, n)
+\begin{DoxyCompactList}\small\item\em Generation of poissonian random values. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacefrandom_a96b8c68d8ed6be8d42364f04ce22838d}{frandom\+::exponential}} (out, mu, n)
+\begin{DoxyCompactList}\small\item\em Generation of exponential random values. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{FortranFunctions_8f90_acbf4614430c2dc38ba9d84923f3fa00b}{fsort}} (array, n)
+\begin{DoxyCompactList}\small\item\em Array sorting done in Fortran. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{FortranFunctions_8f90_ae16e89e62508c9f5fe53a9b646d18130}{signalanalysisfortran}} (integral, peak, toa, tot, top, signalingate, sampling)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+real(8), parameter, private \mbox{\hyperlink{namespacefrandom_a27bfe21fb1a8d13cb209d46815248dcc}{frandom\+::pi2}} = 6.\+28318530718E+00
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function/\+Subroutine Documentation}
+\mbox{\Hypertarget{FortranFunctions_8f90_a2d99718e6db9ae5191af84b55040c709}\label{FortranFunctions_8f90_a2d99718e6db9ae5191af84b55040c709}} 
+\index{FortranFunctions.f90@{FortranFunctions.f90}!froll@{froll}}
+\index{froll@{froll}!FortranFunctions.f90@{FortranFunctions.f90}}
+\doxysubsubsection{\texorpdfstring{froll()}{froll()}}
+{\footnotesize\ttfamily pure subroutine froll (\begin{DoxyParamCaption}\item[{real(8), dimension(npt), intent(out)}]{out,  }\item[{real(8), dimension(npt), intent(in)}]{vect,  }\item[{integer(8), intent(in)}]{t,  }\item[{real(8), intent(in)}]{h,  }\item[{integer(8), intent(in)}]{npt }\end{DoxyParamCaption})}
+
+
+
+Definition at line 33 of file Fortran\+Functions.\+f90.
+
+\mbox{\Hypertarget{FortranFunctions_8f90_a716e4fd2942370026880db408df25d2d}\label{FortranFunctions_8f90_a716e4fd2942370026880db408df25d2d}} 
+\index{FortranFunctions.f90@{FortranFunctions.f90}!fsignal@{fsignal}}
+\index{fsignal@{fsignal}!FortranFunctions.f90@{FortranFunctions.f90}}
+\doxysubsubsection{\texorpdfstring{fsignal()}{fsignal()}}
+{\footnotesize\ttfamily pure subroutine fsignal (\begin{DoxyParamCaption}\item[{real(8), dimension(sigpts), intent(out)}]{s,  }\item[{integer(8), intent(in)}]{t,  }\item[{real(8), intent(in)}]{tf,  }\item[{real(8), intent(in)}]{tr,  }\item[{real(8), intent(in)}]{h,  }\item[{integer(8), intent(in)}]{sigpts }\end{DoxyParamCaption})}
+
+
+
+Generation of Si\+PM signal. 
+
+Generation of Si\+PM signal given starting time, signal shape and noise values. Computes\+: $e^{-frac{t}{t_f}}-e^{-{t}{t_r}}$ 
+\begin{DoxyParams}{Parameters}
+{\em t} & Time position of the signal \\
+\hline
+{\em tr} & Rising time of the signal shape \\
+\hline
+{\em tf} & Falling time of the signal shape \\
+\hline
+{\em h} & Relative signal height \\
+\hline
+{\em sigpts} & Number of samples \\
+\hline
+{\em gvar} & Multiplicative factor accounting for gain variation \\
+\hline
+{\em s} & Signal \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 16 of file Fortran\+Functions.\+f90.
+
+\mbox{\Hypertarget{FortranFunctions_8f90_acbf4614430c2dc38ba9d84923f3fa00b}\label{FortranFunctions_8f90_acbf4614430c2dc38ba9d84923f3fa00b}} 
+\index{FortranFunctions.f90@{FortranFunctions.f90}!fsort@{fsort}}
+\index{fsort@{fsort}!FortranFunctions.f90@{FortranFunctions.f90}}
+\doxysubsubsection{\texorpdfstring{fsort()}{fsort()}}
+{\footnotesize\ttfamily subroutine fsort (\begin{DoxyParamCaption}\item[{real(8), dimension(n)}]{array,  }\item[{integer(8)}]{n }\end{DoxyParamCaption})}
+
+
+
+Array sorting done in Fortran. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em array} & Array to be sorted \\
+\hline
+{\em n} & Number of elements in the array \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 171 of file Fortran\+Functions.\+f90.
+
+\mbox{\Hypertarget{FortranFunctions_8f90_ae16e89e62508c9f5fe53a9b646d18130}\label{FortranFunctions_8f90_ae16e89e62508c9f5fe53a9b646d18130}} 
+\index{FortranFunctions.f90@{FortranFunctions.f90}!signalanalysisfortran@{signalanalysisfortran}}
+\index{signalanalysisfortran@{signalanalysisfortran}!FortranFunctions.f90@{FortranFunctions.f90}}
+\doxysubsubsection{\texorpdfstring{signalanalysisfortran()}{signalanalysisfortran()}}
+{\footnotesize\ttfamily subroutine signalanalysisfortran (\begin{DoxyParamCaption}\item[{real(8)}]{integral,  }\item[{real(8)}]{peak,  }\item[{real(8)}]{toa,  }\item[{real(8)}]{tot,  }\item[{real(8)}]{top,  }\item[{real(8), dimension(\+:)}]{signalingate,  }\item[{real(8)}]{sampling }\end{DoxyParamCaption})}
+
+
+
+Definition at line 212 of file Fortran\+Functions.\+f90.
+

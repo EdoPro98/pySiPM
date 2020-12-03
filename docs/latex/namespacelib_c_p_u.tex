@@ -1,0 +1,38 @@
+\hypertarget{namespacelib_c_p_u}{}\doxysection{lib\+C\+PU Namespace Reference}
+\label{namespacelib_c_p_u}\index{libCPU@{libCPU}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespacelib_c_p_u_a18d3563997e1783b1257c4c05eb3ff73}{Pulse\+C\+PU}} (t, h)
+\begin{DoxyCompactList}\small\item\em Generation of single cell signals. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}In this file I define all the functions I will use in the main file of simulation.\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespacelib_c_p_u_a18d3563997e1783b1257c4c05eb3ff73}\label{namespacelib_c_p_u_a18d3563997e1783b1257c4c05eb3ff73}} 
+\index{libCPU@{libCPU}!PulseCPU@{PulseCPU}}
+\index{PulseCPU@{PulseCPU}!libCPU@{libCPU}}
+\doxysubsubsection{\texorpdfstring{PulseCPU()}{PulseCPU()}}
+{\footnotesize\ttfamily def lib\+C\+P\+U.\+Pulse\+C\+PU (\begin{DoxyParamCaption}\item[{}]{t,  }\item[{}]{h }\end{DoxyParamCaption})}
+
+
+
+Generation of single cell signals. 
+
+Function that generates the signal from a single Si\+PM cell. This is the \char`\"{}full\char`\"{} version that calculates each signal considering a double exponential function.
+
+
+\begin{DoxyParams}{Parameters}
+{\em t} & Time at which the cell is triggered. \\
+\hline
+{\em h} & The relative pulse height of the cell signal \\
+\hline
+{\em gainvar} & Value of cell to cell gain variation for this signal.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyVerb}@return s: Array containing the generated cell signal
+\end{DoxyVerb}
+ 

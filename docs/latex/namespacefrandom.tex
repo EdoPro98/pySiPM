@@ -1,0 +1,123 @@
+\hypertarget{namespacefrandom}{}\doxysection{frandom Module Reference}
+\label{namespacefrandom}\index{frandom@{frandom}}
+
+
+F2\+PY extension for Python. Random arrays generation in Fortran.  
+
+
+\doxysubsection*{Functions/\+Subroutines}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \mbox{\hyperlink{namespacefrandom_acf60cc17c1797f1c012b4b61d35aa552}{integer}} (out, sup, n)
+\begin{DoxyCompactList}\small\item\em Generation of random integers in range \mbox{[}0 -\/ sup\mbox{]}. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacefrandom_a4b868ff3f4b2328fee382df82ebb3c5a}{normal}} (out, mu, sigma, n)
+\begin{DoxyCompactList}\small\item\em Generation of gaussian random values using Box-\/\+Muller transform. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacefrandom_aa318f8f56b68345a9ffc00c92f8468ed}{poisson}} (out, mu, n)
+\begin{DoxyCompactList}\small\item\em Generation of poissonian random values. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacefrandom_a96b8c68d8ed6be8d42364f04ce22838d}{exponential}} (out, mu, n)
+\begin{DoxyCompactList}\small\item\em Generation of exponential random values. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+F2\+PY extension for Python. Random arrays generation in Fortran. 
+
+\begin{DoxyAuthor}{Author}
+Edoardo Proserpio 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Function/\+Subroutine Documentation}
+\mbox{\Hypertarget{namespacefrandom_a96b8c68d8ed6be8d42364f04ce22838d}\label{namespacefrandom_a96b8c68d8ed6be8d42364f04ce22838d}} 
+\index{frandom@{frandom}!exponential@{exponential}}
+\index{exponential@{exponential}!frandom@{frandom}}
+\doxysubsubsection{\texorpdfstring{exponential()}{exponential()}}
+{\footnotesize\ttfamily subroutine frandom\+::exponential (\begin{DoxyParamCaption}\item[{real(8), dimension(n)}]{out,  }\item[{real(8)}]{mu,  }\item[{\mbox{\hyperlink{namespacefrandom_acf60cc17c1797f1c012b4b61d35aa552}{integer}}(8)}]{n }\end{DoxyParamCaption})}
+
+
+
+Generation of exponential random values. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mu} & Mean value of exponential distribution \\
+\hline
+{\em n} & Number of elements to generate \\
+\hline
+{\em out} & \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 151 of file Fortran\+Functions.\+f90.
+
+\mbox{\Hypertarget{namespacefrandom_acf60cc17c1797f1c012b4b61d35aa552}\label{namespacefrandom_acf60cc17c1797f1c012b4b61d35aa552}} 
+\index{frandom@{frandom}!integer@{integer}}
+\index{integer@{integer}!frandom@{frandom}}
+\doxysubsubsection{\texorpdfstring{integer()}{integer()}}
+{\footnotesize\ttfamily subroutine frandom\+::integer (\begin{DoxyParamCaption}\item[{integer(8), dimension(n)}]{out,  }\item[{integer(8)}]{sup,  }\item[{integer(8)}]{n }\end{DoxyParamCaption})}
+
+
+
+Generation of random integers in range \mbox{[}0 -\/ sup\mbox{]}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sup} & Superior limit for random generation \\
+\hline
+{\em n} & Number of elements to generate \\
+\hline
+{\em out} & \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 66 of file Fortran\+Functions.\+f90.
+
+\mbox{\Hypertarget{namespacefrandom_a4b868ff3f4b2328fee382df82ebb3c5a}\label{namespacefrandom_a4b868ff3f4b2328fee382df82ebb3c5a}} 
+\index{frandom@{frandom}!normal@{normal}}
+\index{normal@{normal}!frandom@{frandom}}
+\doxysubsubsection{\texorpdfstring{normal()}{normal()}}
+{\footnotesize\ttfamily subroutine frandom\+::normal (\begin{DoxyParamCaption}\item[{real(8), dimension(n)}]{out,  }\item[{real(8)}]{mu,  }\item[{real(8)}]{sigma,  }\item[{\mbox{\hyperlink{namespacefrandom_acf60cc17c1797f1c012b4b61d35aa552}{integer}}(8)}]{n }\end{DoxyParamCaption})}
+
+
+
+Generation of gaussian random values using Box-\/\+Muller transform. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mu} & Mean value of gaussian distribution \\
+\hline
+{\em sigma} & Standard deviation of gaussian distribution \\
+\hline
+{\em n} & Number of elements to generate \\
+\hline
+{\em out} & \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 87 of file Fortran\+Functions.\+f90.
+
+\mbox{\Hypertarget{namespacefrandom_aa318f8f56b68345a9ffc00c92f8468ed}\label{namespacefrandom_aa318f8f56b68345a9ffc00c92f8468ed}} 
+\index{frandom@{frandom}!poisson@{poisson}}
+\index{poisson@{poisson}!frandom@{frandom}}
+\doxysubsubsection{\texorpdfstring{poisson()}{poisson()}}
+{\footnotesize\ttfamily subroutine frandom\+::poisson (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespacefrandom_acf60cc17c1797f1c012b4b61d35aa552}{integer}}(8), dimension(n)}]{out,  }\item[{real(8)}]{mu,  }\item[{\mbox{\hyperlink{namespacefrandom_acf60cc17c1797f1c012b4b61d35aa552}{integer}}(8)}]{n }\end{DoxyParamCaption})}
+
+
+
+Generation of poissonian random values. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mu} & Mean value of poissonian distribution \\
+\hline
+{\em n} & Number of elements to generate \\
+\hline
+{\em out} & \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 116 of file Fortran\+Functions.\+f90.
+

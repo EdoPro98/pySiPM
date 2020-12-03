@@ -1,0 +1,95 @@
+\begin{theindex}
+
+  \item {addAP}
+    \subitem {lib}, \hyperpage{8}
+  \item {addDCR}
+    \subitem {lib}, \hyperpage{8}
+  \item {addXT}
+    \subitem {lib}, \hyperpage{9}
+
+  \indexspace
+
+  \item {exponential}
+    \subitem {frandom}, \hyperpage{5}
+
+  \indexspace
+
+  \item {frandom}, \hyperpage{5}
+    \subitem {exponential}, \hyperpage{5}
+    \subitem {integer}, \hyperpage{6}
+    \subitem {normal}, \hyperpage{6}
+    \subitem {poisson}, \hyperpage{6}
+
+  \indexspace
+
+  \item {HitCells}
+    \subitem {lib}, \hyperpage{9}
+
+  \indexspace
+
+  \item {initializeRandomPool}
+    \subitem {lib}, \hyperpage{10}
+  \item {integer}
+    \subitem {frandom}, \hyperpage{6}
+
+  \indexspace
+
+  \item {lib}, \hyperpage{7}
+    \subitem {addAP}, \hyperpage{8}
+    \subitem {addDCR}, \hyperpage{8}
+    \subitem {addXT}, \hyperpage{9}
+    \subitem {HitCells}, \hyperpage{9}
+    \subitem {initializeRandomPool}, \hyperpage{10}
+    \subitem {PulseCPU}, \hyperpage{10}
+    \subitem {signalAnalysis}, \hyperpage{10}
+    \subitem {sigPlot}, \hyperpage{11}
+    \subitem {SiPMEventAction}, \hyperpage{12}
+    \subitem {SiPMSignalAction}, \hyperpage{12}
+    \subitem {somestats}, \hyperpage{13}
+  \item {libCPU}, \hyperpage{13}
+    \subitem {PulseCPU}, \hyperpage{14}
+  \item {libGPU}, \hyperpage{14}
+    \subitem {PulseGPU}, \hyperpage{14}
+    \subitem {SiPMSignalAction}, \hyperpage{16}
+
+  \indexspace
+
+  \item {main}, \hyperpage{16}
+    \subitem {SiPM}, \hyperpage{17}
+
+  \indexspace
+
+  \item {normal}
+    \subitem {frandom}, \hyperpage{6}
+
+  \indexspace
+
+  \item {poisson}
+    \subitem {frandom}, \hyperpage{6}
+  \item {PulseCPU}
+    \subitem {lib}, \hyperpage{10}
+    \subitem {libCPU}, \hyperpage{14}
+  \item {PulseGPU}
+    \subitem {libGPU}, \hyperpage{14}
+
+  \indexspace
+
+  \item {signalAnalysis}
+    \subitem {lib}, \hyperpage{10}
+  \item {sigPlot}
+    \subitem {lib}, \hyperpage{11}
+  \item {SiPM}
+    \subitem {main}, \hyperpage{17}
+  \item {SiPMEventAction}
+    \subitem {lib}, \hyperpage{12}
+  \item {SiPMSignalAction}
+    \subitem {lib}, \hyperpage{12}
+    \subitem {libGPU}, \hyperpage{16}
+  \item {somestats}
+    \subitem {lib}, \hyperpage{13}
+
+  \indexspace
+
+  \item {variables}, \hyperpage{17}
+
+\end{theindex}
