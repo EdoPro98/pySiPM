@@ -1,6 +1,6 @@
 """In this file I define all the functions I will use in the main file of simulation."""
 from libs.libCPU import PulseCPU
-from libs.FortranFunctions import signalgenfortran
+from libs.FortranFunctions import fsignal
 from variables import *
 
 # EDITING THIS FILE MAY SERIOUSLY COMPROMISE SIMULATION BEHAVIOUR
@@ -8,9 +8,9 @@ from variables import *
 signalShapeGPU = cp.ElementwiseKernel(
     # CUDA kernel that generates the signal.
     # Signals are generated in a matrix, each row is a signal, summed up column-wise
-    'int32 x, float32 TFALL, float32 TRISE, float32 CCGV, float32 h',
+    'int32 x, float32 TFALL, float32 TRISE, float32 h',
     'float32 z',
-    'z = h * CCGV * (__expf(-x / TFALL) - __expf(-x / TRISE));',
+    'z = h * (__expf(-x / TFALL) - __expf(-x / TRISE));',
     'signalShape')
 
 
@@ -33,12 +33,10 @@ def PulseGPU(t, h):
     vect = (cp.arange(SIGPTS, dtype=cp.int32) + cp.zeros((n, 1), dtype=cp.int32) - t[:, None])
     # Zero before the signal
     vect[vect < 0] = 0
-    # Generate random ccgv
-    gainvar = cp.random.normal(1, CCGV, (n, 1), dtype=cp.float32)
     # Transpose array of height values
     h = h[:, None]
     # Call kernel to generate singal
-    sig = cp.sum(signalShapeGPU(vect, TFALL / SAMPLING, TRISE / SAMPLING, gainvar, h), axis=0)
+    sig = cp.sum(signalShapeGPU(vect, TFALL / SAMPLING, TRISE / SAMPLING, h), axis=0)
     # If there are afterpulses generate theyr signals
     return sig
 
@@ -71,10 +69,10 @@ def SiPMSignalAction(times, sigH, snr, basespread):
     sigH = sigH[times < SIGLEN]
     times = (times[times < SIGLEN] / SAMPLING).astype(np.uint32)
     signal = normal(0, SNR, SIGPTS)
+    sigH = sigH * normal(1, CCGV, times.size)   # Each signal has a ccgv
     if (times.size < CPUTHRESHOLD) or (times.size > GPUMAX):
-        gainvars = normal(1, CCGV, times.size)   # Each signal has a ccgv
         for i in range(times.size):
-            signal += PulseCPU(times[i], sigH[i], gainvars[i])
+            signal += PulseCPU(times[i], sigH[i])
         return signal
     else:
         signal = cp.asarray(signal)

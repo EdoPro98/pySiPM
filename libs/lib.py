@@ -269,22 +269,13 @@ def signalAnalysis(signal, intstart, intgate, threshold):
     """
 
     sigingate = signal[intstart:intstart + intgate]
-
-    test = sigingate.max()
-
-    if test > threshold:
-        mask = sigingate > threshold
-        peak = test
-        integral = sigingate.sum() * SAMPLING
-        toa = mask.argmax() * SAMPLING
-        tot = np.count_nonzero(mask) * SAMPLING
-        top = sigingate.argmax() * SAMPLING
-    else:
-        peak = -1
-        integral = -1
-        toa = -1
-        tot = -1
-        top = -1
+    
+    mask = sigingate > threshold
+    peak = sigingate.max()
+    integral = sigingate.sum() * SAMPLING
+    toa = mask.argmax() * SAMPLING
+    tot = np.count_nonzero(mask) * SAMPLING
+    top = sigingate.argmax() * SAMPLING
 
     return peak, integral, toa, tot, top
 

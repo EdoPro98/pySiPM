@@ -1,7 +1,8 @@
 from main import *
+import time
 
-NPE = 10
-NEVTS = 50000
+NPE = 0
+NEVTS = 100000
 
 pool = multiprocessing.Pool(args.jobs, initializer=initializeRandomPool, initargs=(0,))
 
@@ -14,9 +15,16 @@ for i in range(NEVTS):
     other.append([])
 
 input = zip(times, other)
+startingtime = time.time_ns()
 results = pool.starmap_async(SiPM, input)
 pool.close()
 pool.join()
+endingtime = time.time_ns()
+
+elapsedtime = (endingtime - startingtime)
+eventsperms = NEVTS / (elapsedtime / 1e6)
+print(f'\nElapsed time: {elapsedtime / 1e6:.2f} ms [{elapsedtime / 1e9:.2f} s]')
+print(f'Simulation speed: {eventsperms:.3f} signals/ms [{1/eventsperms:.2f} ms per signal]')
 
 features = np.empty((NEVTS, 5), dtype='float')
 eventinfo = []
