@@ -21,7 +21,7 @@ def addDCR(rate):
     last = 0
     # Generate using exponential distribution of delays
     while last < SIGLEN:
-        last = frandom.exponential(1e9 / rate, 1).item()
+        last += frandom.exponential(1e9 / rate, 1).item()
         dcrTime.append(last)
 
     # Delete last one (exceeding SIGLEN)
@@ -267,21 +267,13 @@ def signalAnalysis(signal, intstart, intgate, threshold):
     """
     sigingate = signal[intstart:intstart + intgate]
 
-    test = sigingate.max()
+    mask = sigingate > threshold
+    peak = sigingate.max()
+    integral = sigingate.sum() * SAMPLING
+    toa = mask.argmax() * SAMPLING
+    tot = np.count_nonzero(mask) * SAMPLING
+    top = sigingate.argmax() * SAMPLING
 
-    if test > threshold:
-        mask = sigingate > threshold
-        peak = test
-        integral = sigingate.sum() * SAMPLING
-        toa = mask.argmax() * SAMPLING
-        tot = np.count_nonzero(mask) * SAMPLING
-        top = sigingate.argmax() * SAMPLING
-    else:
-        peak = -1
-        integral = -1
-        toa = -1
-        tot = -1
-        top = -1
     return peak, integral, toa, tot, top
 
 

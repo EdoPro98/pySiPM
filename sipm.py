@@ -78,9 +78,6 @@ def SiPM(times, other=None):
             else:
                 dev = 'gpu'
         sigPlot(signal, len(times), ndcr, dev)
-    # If no need to output the signal substitute with None to save space
-    if not args.wavedump:
-        signal = None
 
     debug = (npe, ndcr, nxt, nap)
     return (integral, peak, tstart, tovert, tpeak), other, signal, debug

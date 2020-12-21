@@ -75,7 +75,7 @@ BASESPREAD = 0.00
 CCGV = 0.05			# relative to single pe peack height (sigma)
 
 # Trigger parameters
-INTSTART = 2		# in ns
+INTSTART = 10		# in ns
 INTGATE = 300		# in ns
 PREG = 0			# in ns
 THRESHOLD = 1.5     # in pe
