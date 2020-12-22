@@ -1,4 +1,4 @@
-# In this file I define all the global variables that I will use in other files.
+"""In this file I define all the global variables that I will use in other files."""
 import files.banner
 import argparse
 import importlib
@@ -16,14 +16,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import uproot
+from datetime import datetime
 from matplotlib.ticker import MaxNLocator
 from numpy import cumsum, exp, hstack, sort, unique
-from numpy.random import choice, exponential, poisson, randint
+from numpy.random import randint, poisson, normal
 
 if importlib.util.find_spec('cupy'):
     import cupy as cp
-else:
-    print('Cupy not found, unable to run on GPU, will use CPU')
 
 matplotlib.use('Qt5Agg')
 plt.style.use('fast')
@@ -32,52 +31,43 @@ plt.rc('lines', antialiased=False)
 warnings.simplefilter('always', DeprecationWarning)
 warnings.simplefilter('always', ImportWarning)
 
-
-###############################################################################
-##################################>>>  VARIABLES DEFINITIONS  <<<##############
-###############################################################################
-global SIGLEN	   	# Length of signal in ns
-global SAMPLING		# Samlping time in ns
-global SIGPTS		# Total number of points in signal
-global NCELL		# Total number of cells in SiPM matrix
-global CELLSIDE		# Number of cells in the side of SiPM matrix
-global DCR			# Dark Count Rate in Hz
-global XT			# Optical Cross Talk probability in %
-global TFALL		# Falling time of SiPM signal in ns
-global TRISE		# Rising time of SiPM signal in ns
-global CELLRECOVERY # Cell recovery time in ns
-global INTSTART		# Start of integration gate in ns
-global INTGATE		# Integration gate lenght in ns
-global PREG			# Lenght of pre-gate in ns
-global SNR			# Signal to noise ratio in dB
-global BASESPREAD   # Baseline spread (sigma)
-global CCGV			# Cell to cell gain variation (sigma)
-global NORMPE		# Normalization of peack height (1 pe  => peak  =  1)
-global AP			# After pulsing probability in %
-global TAUAPFAST    # After pulses time distribution decay (fast) in ns
-global TAUAPSLOW    # After pulses time distribution decay (slow) in ns
-global FASTDCR		# Enable fast generation of DCR (less precision)
-global FASTXT		# Enable fast generation of XT (less precision)
-global CPUTHRESHOLD # If there are more pe than this value swich to GPU
-global GPUMAX		# If there are more pe than this value swich back to CPU
+global SIGLEN  # Length of signal in ns
+global SAMPLING  # Samlping time in ns
+global SIGPTS  # Total number of points in signal
+global NCELL  # Total number of cells in SiPM matrix
+global CELLSIDE  # Number of cells in the side of SiPM matrix
+global DCR  # Dark Count Rate in Hz
+global XT  # Optical Cross Talk probability in %
+global TFALL  # Falling time of SiPM signal in ns
+global TRISE  # Rising time of SiPM signal in ns
+global CELLRECOVERY  # Cell recovery time in ns
+global INTSTART  # Start of integration gate in ns
+global INTGATE  # Integration gate lenght in ns
+global PREG  # Lenght of pre-gate in ns
+global SNR  # Signal to noise ratio in dB
+global BASESPREAD  # Baseline spread (sigma)
+global CCGV  # Cell to cell gain variation (sigma)
+global NORMPE  # Normalization of peack height (1 pe  => peak  =  1)
+global AP  # After pulsing probability in %
+global TAUAPFAST  # After pulses time distribution decay (fast) in ns
+global TAUAPSLOW  # After pulses time distribution decay (slow) in ns
+global CPUTHRESHOLD  # If there are more pe than this value swich to GPU
+global GPUMAX  # If there are more pe than this value swich back to CPU
 
 
-###############################################################################
-##################################>>>   EDITABLE VARIABLES   <<<###############
-###############################################################################
 # Signal parameters
 SIGLEN = 500        # in ns
-SAMPLING = 0.1      # in ns
+SAMPLING = 1        # in ns
 
 # SiPM parameters
 SIZE = 1			# in mm
-CELLSIZE = 25		# in um
+CELLSIZE = 10		# in um
 DCR = 200e3			# in Hz
-XT = 0.01			# in %
-AP = 0.03			# in %
+XT = 0.02			# in %
+AP = 0.01			# in %
 TFALL = 50			# in ns
 TRISE = 1			# in ns
-CELLRECOVERY = 20   # in ns
+CELLRECOVERY = 30   # in ns
 TAUAPFAST = 15		# in ns
 TAUAPSLOW = 85		# in ns
 SNR = 30			# in dB single pe peack height (sigma) Off at the moment
@@ -85,21 +75,18 @@ BASESPREAD = 0.00
 CCGV = 0.05			# relative to single pe peack height (sigma)
 
 # Trigger parameters
-INTSTART = 5		# in ns
+INTSTART = 10		# in ns
 INTGATE = 300		# in ns
 PREG = 0			# in ns
+THRESHOLD = 1.5     # in pe
 
 # Simulation parameters
-FASTDCR = False
-FASTXT = False
 FASTSIG = True
 CPUTHRESHOLD = 100
 GPUMAX = 2000
 
 
-###############################################################################
-##########################>>> ARGUMENTSS PARSER  <<<###########################
-###############################################################################
+# ARGUMENTSS PARSER
 description = '''Software for SiPM simulation'''
 epilog = '''Try -g -G to get started :)\
 \n\nDeveloped for IDEA Dual Readout Calorimeter collaboration\
@@ -107,11 +94,7 @@ epilog = '''Try -g -G to get started :)\
 \nMassimiliano Antonello:\tmassimiliano.antonello@mi.infn.it\
 \nRomualdo Santoro:\tromualdo.santoro@uninsubria.it'''
 parser = argparse.ArgumentParser('pySiPM',
-                            integral = signalInGate.sum() * SAMPLING
-    peak = signalInGate.max()
-    tstart = (signalInGate > 1.5).argmax() * SAMPLING
-    tovert = np.count_nonzero(signalInGate > 1.5) * SAMPLING
-    tpeak = (signalInGate).argmax() * SAMPLING         add_help=False,
+                                 add_help=False,
                                  description=description,
                                  epilog=epilog,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -125,6 +108,8 @@ parser.add_argument('-d', '--device', nargs='?', type=str,
                     choices=['cpu', 'gpu'], default='cpu')
 parser.add_argument('-g', '--graphics', action='count',
                     help='Histograms of generated events')
+parser.add_argument('-D', '--debug', action='count',
+                    help='Activate debug info')
 parser.add_argument('-q', '--quiet', action='count', help='Quiet')
 parser.add_argument('-w', '--write', nargs='?', type=str,
                     help='File to write as output', metavar='filename.root')
@@ -134,69 +119,49 @@ parser.add_argument('-j', '--jobs', type=int,
                     help='Number of jobs for multiprocessing', metavar='N')
 parser.add_argument('-NDCR', '--nodcr', action='count',
                     help='Set DCR rate to 0')
-parser.add_argument('-FDCR', '--FASTDCR', action='count',
-                    help='Faster generation of DCR')
 parser.add_argument('-NXT', '--noxt', action='count', help='Set XT rate to 0')
-parser.add_argument('-FXT', '--FASTXT', action='count',
-                    help='Faster generation of XT')
 parser.add_argument('-NAP', '--noap', action='count', help='Set AP rate to 0')
 parser.add_argument('-SIG', '--signal', action='count',
                     help='Generate each signal independently (slower)')
 parser.add_argument('-f', '--fname', nargs='?', type=str,
                     help='Configuration file', metavar='filename.txt')
 parser.add_argument('-W', '--wavedump', nargs='?', type=str,
-                    help='Output Digitized Waveforms on hdf5 file', metavar='groupname')
-parser.add_argument('-D', '--clean', action='count',
-                    help='Clear old output files')
+                    help='Output Digitized Waveforms on hdf5 file',
+                    metavar='filename')
+# parser.add_argument('-T', '--txtfile', nargs='?', type=str,
+#                     help='Input of txt file', metavar='groupname')
 
 args = parser.parse_args()
 
 if importlib.util.find_spec('cupy') is None:
+    print('Cupy not found, unable to run on GPU, will use CPU')
     args.device = 'cpu'
 
 if args.jobs:
-    if isinstance(args.jobs, int):
-        nJobs = args.jobs
-    else:
-        warnings.warn(f'Invalid entry for number of jobs: {args.jobs}. Using only one', category=UserWarning)
-        nJobs = 1
+    nJobs = args.jobs
 else:
     nJobs = multiprocessing.cpu_count()  # If not specified all cores are used
 
 if args.quiet:
     sys.stdout = open('/dev/null', 'w')
 
-if args.nodcr:		# Set DCR rate to 0
-    DCR = 0
-    FASTDCR = True
-
-if args.noxt:		# Set XT rate to 0
-    XT = 0
-    FASTXT = True
-
-if args.noap:		# Set AP rate to 0
-    AP = 0
-
-if args.FASTDCR:  # Sligtly faster generation of DCR
-    FASTDCR = True
-
-if args.FASTXT:		# Sligtly faster generation of XT
-    FASTXT = True
-
 if args.signal:		# Refer to libs/lib file for a detailed description
     FASTSIG = False
 
 if args.fname:
+    # Printing external file setup
     print(f'\nReding SiPM setting from: {args.fname:s}')
     print('___________________________________')
     f = open(args.fname)
-    [print(l.rstrip()) for l in f.readlines() if not l.startswith('#')]
+    [print(line.rstrip()) for line in f.readlines() if not line.startswith('#')]
     print('___________________________________\n')
     f.close()
+    # Eventually load setting from external file
     f = open(args.fname)
-    exec(f.read())			# Eventually load setting from external file
+    exec(f.read())
 else:
-    print('\nUsing default SiPM settings!\n')  # Use settings defined above
+    # Use settings defined above
+    print('\nUsing default SiPM settings!\n')
 
 print('Detected %d cores...\r' % (multiprocessing.cpu_count()))
 print('Initializing simulation on %d cores...\n' % (nJobs))
@@ -209,24 +174,12 @@ if args.signal:
     if args.device:
         print('Generating signals on ' + args.device.upper())
         if args.device == 'gpu':
-            warnings.warn('Signal generation on GPU is deprecated... use CPU preferably',category=DeprecationWarning,stacklevel=3)
+            warnings.warn('Signal generation on GPU is deprecated... use CPU preferably', category=DeprecationWarning, stacklevel=3)
 
-if args.clean is not None:
-    if os.path.exists('waveforms.hdf5'):
-        os.remove('waveforms.hdf5')
-
-###############################################################################
-#######################>>> NOT EDITABLE VARIABLES   <<<########################
-###############################################################################
-# Conversion of time units from ns to units of sampling times.
+# NOT EDITABLE VARIABLES
+# Performing conversion of time units from ns to
+# units of sampling times and basic calculations.
 SAMPLING *= 1.
-PEAKHEIGHT = -exp(TFALL*np.log(TRISE/TFALL)/(TFALL - TRISE)) + exp(TRISE*np.log(TRISE/TFALL)/(TFALL - TRISE))
-THRESHOLD = 1.5 * PEAKHEIGHT
-# TFALL = np.float32(TFALL / SAMPLING)
-# TRISE = np.float32(TRISE / SAMPLING)
-# CELLRECOVERY = np.float32(CELLRECOVERY / SAMPLING)
-# TAUAPFAST = np.float32(TAUAPFAST / SAMPLING)
-# TAUAPSLOW = np.float32(TAUAPSLOW / SAMPLING)
 SIGPTS = int(SIGLEN / SAMPLING)
 CELLSIDE = int(SIZE / (CELLSIZE * 1e-3))
 NCELL = int(CELLSIDE**2) - 1
@@ -236,8 +189,10 @@ if INTGATE + INTSTART > SIGLEN:
     INTGATE = SIGLEN - INTSTART
 INTSTART = int(INTSTART / SAMPLING)
 INTGATE = int(INTGATE / SAMPLING)
-PREG = PREG / SAMPLING
-PREG = int(INTSTART - PREG)
-b = TFALL / TRISE
-NORMPE = 1  # (b**(1/(1-b))-b**(1/((1/b)-1)))**-1
-SNR = PEAKHEIGHT * 10**(-SNR / 20)
+PREG = int(INTSTART - PREG / SAMPLING)
+PEAKRATIO = -exp(TFALL*np.log(TRISE/TFALL)/(TFALL - TRISE)) + exp(TRISE*np.log(TRISE/TFALL)/(TFALL - TRISE))
+PEAKRATIO = 1 / PEAKRATIO
+SNR = 10**(-SNR / 20)
+
+TF = TFALL / SAMPLING
+TR = TRISE / SAMPLING

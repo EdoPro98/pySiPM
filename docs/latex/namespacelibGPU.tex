@@ -1,0 +1,72 @@
+\hypertarget{namespacelibGPU}{}\doxysection{lib\+G\+PU Namespace Reference}
+\label{namespacelibGPU}\index{libGPU@{libGPU}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespacelibGPU_aa2dad936a3ecbc58ad25ed3e3104b4e0}{Pulse\+G\+PU}} (t, h)
+\begin{DoxyCompactList}\small\item\em Function that generates the signal from all Si\+PM cells at once. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{namespacelibGPU_abfba6285e8f27d69664c52fddb08c358}{Si\+P\+M\+Signal\+Action}} (times, sigH, snr, basespread)
+\begin{DoxyCompactList}\small\item\em Generation of full Si\+PM signal. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}In this file I define all the functions I will use in the main file of simulation.\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespacelibGPU_aa2dad936a3ecbc58ad25ed3e3104b4e0}\label{namespacelibGPU_aa2dad936a3ecbc58ad25ed3e3104b4e0}} 
+\index{libGPU@{libGPU}!PulseGPU@{PulseGPU}}
+\index{PulseGPU@{PulseGPU}!libGPU@{libGPU}}
+\doxysubsubsection{\texorpdfstring{PulseGPU()}{PulseGPU()}}
+{\footnotesize\ttfamily def lib\+G\+P\+U.\+Pulse\+G\+PU (\begin{DoxyParamCaption}\item[{}]{t,  }\item[{}]{h }\end{DoxyParamCaption})}
+
+
+
+Function that generates the signal from all Si\+PM cells at once. 
+
+This is the \char`\"{}full\char`\"{} version that computes the signal shape on G\+PU. The signals are generated at once using a C\+U\+DA kernel that generates the signals of each cell in a matrix (one cell per row) and then sums everything column-\/wise obtaining the complete Si\+PM signal.
+
+
+\begin{DoxyParams}{Parameters}
+{\em t} & Array containing times at which each the cell is triggered \\
+\hline
+{\em h} & Array containing the relative pulse height of each cell signal\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+s\+: Array containing the generated Si\+PM signal 
+\end{DoxyReturn}
+
+
+Definition at line 17 of file lib\+G\+P\+U.\+py.
+
+\mbox{\Hypertarget{namespacelibGPU_abfba6285e8f27d69664c52fddb08c358}\label{namespacelibGPU_abfba6285e8f27d69664c52fddb08c358}} 
+\index{libGPU@{libGPU}!SiPMSignalAction@{SiPMSignalAction}}
+\index{SiPMSignalAction@{SiPMSignalAction}!libGPU@{libGPU}}
+\doxysubsubsection{\texorpdfstring{SiPMSignalAction()}{SiPMSignalAction()}}
+{\footnotesize\ttfamily def lib\+G\+P\+U.\+Si\+P\+M\+Signal\+Action (\begin{DoxyParamCaption}\item[{}]{times,  }\item[{}]{sigH,  }\item[{}]{snr,  }\item[{}]{basespread }\end{DoxyParamCaption})}
+
+
+
+Generation of full Si\+PM signal. 
+
+Function that generates the full Si\+PM signal as the sum of the signals of each cell starting from gaussian noise. If there are fewer hitted cells the signal is generated on C\+PU to avoid the overhead caused by moving data to G\+PU memory. Also if there are too many hitted cells the signal is generated on C\+PU to avoid an out-\/of-\/memory condition since usually V\+R\+AM is smaller than system memory. Those conditions are controlled by variables.\+C\+P\+U\+T\+H\+R\+E\+S\+H\+O\+LD and variables.\+G\+P\+U\+M\+AX and are set by default at 100 and 2000.
+
+
+\begin{DoxyParams}{Parameters}
+{\em times} & List containing the time at wich Si\+PM cells are fired, including D\+CR, XT and AP events \\
+\hline
+{\em sigH} & List containing the correspondin relative pulse height of each fired cell. \\
+\hline
+{\em snr} & Signal to noise ratio converted into the R\+MS of the gaussian noise. \\
+\hline
+{\em basespread} & Sigma of the value to add as baseline spread.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+signal\+: Array containing the complete sigitized Si\+PM signal. 
+\end{DoxyReturn}
+
+
+Definition at line 45 of file lib\+G\+P\+U.\+py.
+

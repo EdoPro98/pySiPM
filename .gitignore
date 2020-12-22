@@ -14,5 +14,5 @@
 *.npy
 *.npz
 /Visual
-test.py
 .ropeproject
+Data/*

@@ -1,0 +1,54 @@
+\hypertarget{namespacesipm}{}\doxysection{sipm Namespace Reference}
+\label{namespacesipm}\index{sipm@{sipm}}
+
+
+File containing the main function used to simulate Si\+PM events.  
+
+
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespacesipm_a47c06759384d0975040ecd4a539923ae}{Si\+PM}} (times, other=None)
+\begin{DoxyCompactList}\small\item\em @biref that calls all the procedures defined in libs to generate a complete Si\+PM event. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+File containing the main function used to simulate Si\+PM events. 
+
+Author\+: Edoardo Proserpio Email\+: \href{mailto:eproserpio@studenti.uninsubria.it}{\texttt{ eproserpio@studenti.\+uninsubria.\+it}} \href{mailto:edoardo.proserpio@gmail.com}{\texttt{ edoardo.\+proserpio@gmail.\+com}} 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespacesipm_a47c06759384d0975040ecd4a539923ae}\label{namespacesipm_a47c06759384d0975040ecd4a539923ae}} 
+\index{sipm@{sipm}!SiPM@{SiPM}}
+\index{SiPM@{SiPM}!sipm@{sipm}}
+\doxysubsubsection{\texorpdfstring{SiPM()}{SiPM()}}
+{\footnotesize\ttfamily def sipm.\+Si\+PM (\begin{DoxyParamCaption}\item[{}]{times,  }\item[{}]{other = {\ttfamily None} }\end{DoxyParamCaption})}
+
+
+
+@biref that calls all the procedures defined in libs to generate a complete Si\+PM event. 
+
+This function is the main function used to simulate a complete Si\+PM event. It calls all the other methods with the correct parameters and user settings.
+
+
+\begin{DoxyParams}{Parameters}
+{\em times} & This list contains the arriving time of each photon on the Si\+PM sensor surface. This list is the main input of the simulation.\\
+\hline
+{\em other} & This variable may contain other informations about the event generated. It can be the event id, the arriving time inserted in the simulation or the real number of photons inserted in the simulation. This tuple will be copied as it is in the output.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+integral The integral of the signal calculated in the integration gate.
+
+peak The height of the signal in the integration gate.
+
+tstart The time of arrival of the signal in ns defined as the first sample over the threshld of 1.\+5
+
+other The copy of the {\ttfamily other} variable given in the input.
+
+signal If the options -\/W is enabled the complete Si\+PM signal will be passed in the output. Otherwise this output is \char`\"{}\+None\char`\"{}. 
+\end{DoxyReturn}
+
+
+Definition at line 9 of file sipm.\+py.
+

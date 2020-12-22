@@ -1,0 +1,42 @@
+\@ifundefined {etoctocstyle}{\let \etoc@startlocaltoc \@gobble \let \etoc@settocdepth \@gobble \let \etoc@depthtag \@gobble \let \etoc@setlocaltop \@gobble }{}
+\contentsline {chapter}{\numberline {1}py\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Si\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}PM}{1}{chapter.1}%
+\contentsline {chapter}{\numberline {2}Modules Index}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Packages}{3}{section.2.1}%
+\contentsline {chapter}{\numberline {3}Module Documentation}{5}{chapter.3}%
+\contentsline {section}{\numberline {3.1}frandom Module Reference}{5}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Detailed Description}{5}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Function/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Subroutine Documentation}{5}{subsection.3.1.2}%
+\contentsline {subsubsection}{\numberline {3.1.2.1}exponential()}{5}{subsubsection.3.1.2.1}%
+\contentsline {subsubsection}{\numberline {3.1.2.2}integer()}{6}{subsubsection.3.1.2.2}%
+\contentsline {subsubsection}{\numberline {3.1.2.3}normal()}{6}{subsubsection.3.1.2.3}%
+\contentsline {subsubsection}{\numberline {3.1.2.4}poisson()}{7}{subsubsection.3.1.2.4}%
+\contentsline {section}{\numberline {3.2}lib Namespace Reference}{7}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Detailed Description}{8}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Function Documentation}{8}{subsection.3.2.2}%
+\contentsline {subsubsection}{\numberline {3.2.2.1}addAP()}{8}{subsubsection.3.2.2.1}%
+\contentsline {subsubsection}{\numberline {3.2.2.2}addDCR()}{8}{subsubsection.3.2.2.2}%
+\contentsline {subsubsection}{\numberline {3.2.2.3}addXT()}{9}{subsubsection.3.2.2.3}%
+\contentsline {subsubsection}{\numberline {3.2.2.4}HitCells()}{9}{subsubsection.3.2.2.4}%
+\contentsline {subsubsection}{\numberline {3.2.2.5}initializeRandomPool()}{10}{subsubsection.3.2.2.5}%
+\contentsline {subsubsection}{\numberline {3.2.2.6}PulseCPU()}{10}{subsubsection.3.2.2.6}%
+\contentsline {subsubsection}{\numberline {3.2.2.7}signalAnalysis()}{11}{subsubsection.3.2.2.7}%
+\contentsline {subsubsection}{\numberline {3.2.2.8}sigPlot()}{11}{subsubsection.3.2.2.8}%
+\contentsline {subsubsection}{\numberline {3.2.2.9}SiPMEventAction()}{12}{subsubsection.3.2.2.9}%
+\contentsline {subsubsection}{\numberline {3.2.2.10}SiPMSignalAction()}{12}{subsubsection.3.2.2.10}%
+\contentsline {subsubsection}{\numberline {3.2.2.11}somestats()}{13}{subsubsection.3.2.2.11}%
+\contentsline {section}{\numberline {3.3}lib\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}C\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}PU Namespace Reference}{13}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Detailed Description}{13}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Function Documentation}{14}{subsection.3.3.2}%
+\contentsline {subsubsection}{\numberline {3.3.2.1}PulseCPU()}{14}{subsubsection.3.3.2.1}%
+\contentsline {section}{\numberline {3.4}lib\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}G\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}PU Namespace Reference}{14}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Detailed Description}{14}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Function Documentation}{14}{subsection.3.4.2}%
+\contentsline {subsubsection}{\numberline {3.4.2.1}PulseGPU()}{15}{subsubsection.3.4.2.1}%
+\contentsline {subsubsection}{\numberline {3.4.2.2}SiPMSignalAction()}{16}{subsubsection.3.4.2.2}%
+\contentsline {section}{\numberline {3.5}sipm Namespace Reference}{16}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Detailed Description}{17}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Function Documentation}{17}{subsection.3.5.2}%
+\contentsline {subsubsection}{\numberline {3.5.2.1}SiPM()}{17}{subsubsection.3.5.2.1}%
+\contentsline {section}{\numberline {3.6}variables Namespace Reference}{17}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Detailed Description}{17}{subsection.3.6.1}%
+\contentsline {chapter}{Index}{19}{section*.7}%
