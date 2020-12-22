@@ -9,37 +9,31 @@ launch with: python wavedump.py -W outfilename.hdf5
 WARNING: make sure to have enough free space in the
 working directory to save all the data!
 '''
-from main import *
+from sipm import *
 from itertools import starmap
-import gc
 
 # Openig file
-fname = '../Data/BandX0/br2_seed1_timefinal.digi'
-
-f = open(fname)
-print(f'Opening file: {fname}')
-lines = f.readlines()
-f.close()
+fname = 'Data/E40GeV_1kevents.txt'
 
 # Reading txt file
-TIMES = []
-OTHER = []
-temp = 0
-for line in lines:
-    if not line.strip():
-        continue
-    L = line.split()
-    t = np.array(L[7:], dtype='float32')
-    TIMES.append(t)
-    OTHER.append((np.float32(L[0]), np.float32(L[1] == 'Scin'), np.float32(L[2]), np.float32(L[3]), np.float32(L[4]), np.float32(L[5])))
-    if int(L[0]) % 100 == 0 and int(L[0]) > 0 and temp != L[0]:
-        temp = L[0]
-        print(f'Reading event: {int(L[0]):d} / {int(lines[-1].split()[0]):d}', end='\r')
-    if L[0] == '1':
-        break
-del lines
+with open(fname) as f:
+    print(f'Opening file: {fname}')
+    TIMES = []
+    OTHER = []
+    temp = 0
+    for line in f:
+        if not line.strip():
+            continue
+        L = line.split(' ')
+        t = list(map(float,L[7:]))
+        TIMES.append(t)
+        OTHER.append((int(L[0]), int(L[1] == 'Scin'), int(L[2]), float(L[3]), float(L[4]), float(L[5])))
+        if int(L[0]) % 100 == 0 and int(L[0]) > 0 and temp != L[0]:
+            temp = L[0]
+            print(f'Reading event: {int(L[0]):d}', end='\r')
 
 OTHER = np.array(OTHER)
+INPUT = zip(TIMES, OTHER)
 NFIB = len(TIMES)
 NEVT = int(L[0])
 
@@ -56,8 +50,8 @@ other = np.empty(shape=(NFIB, 6), dtype='float32')
 print('\n===> Starting simulation <===\n')
 # Loop using multiprocessing on chunks of data
 # Output is stored in HDF5 file inside the loop
-pool = Pool(args.jobs, initializer=initializeRandomPool, maxtasksperchild=4096)
-CHUNK = 50000
+pool = Pool(args.jobs, initializer=initializeRandomPool, maxtasksperchild=2**16)
+CHUNK = 100000
 if CHUNK > NFIB:
     CHUNK = NFIB
 temp = 0
@@ -68,25 +62,24 @@ while i < NFIB:
     res = pool.starmap_async(SiPM, INPUT)
     res.wait()
     for j, r in enumerate(res.get()):
-        dset1[i+j, :] = r[6]
-        dset2[i+j, :] = r[:5]
-        dset3[i+j, :] = r[5]
-        output[i+j, :] = r[:5]
-        other[i+j, :] = r[5]
-    if OTHER[i][0] % 10 == 0 and OTHER[i][0] != temp:
+        dset1[i+j, :] = r[2]
+        dset2[i+j, :] = r[0]
+        dset3[i+j, :] = r[1]
+        output[i+j, :] = r[0]
+        other[i+j, :] = r[1]
+    if OTHER[i][0] - temp > 10:
         hf.flush()
-        gc.collect()
         print(f'Events simulated: {int(OTHER[i][0]):d} of {NEVT:d}')
         temp = OTHER[i][0]
     i += CHUNK
 INPUT = zip(TIMES[i:], OTHER[i:])
 res = starmap(SiPM, INPUT)
 for j, r in enumerate(res):
-    dset1[i+j, :] = r[6]
-    dset2[i+j, :] = r[:5]
-    dset3[i+j, :] = r[5]
-    output[i+j, :] = r[:5]
-    other[i+j, :] = r[5]
+    dset1[i+j, :] = r[2]
+    dset2[i+j, :] = r[0]
+    dset3[i+j, :] = r[1]
+    output[i+j, :] = r[0]
+    other[i+j, :] = r[1]
 hf.close()
 Te = time.time()
 

@@ -75,7 +75,7 @@ BASESPREAD = 0.00
 CCGV = 0.05			# relative to single pe peack height (sigma)
 
 # Trigger parameters
-INTSTART = 2		# in ns
+INTSTART = 10		# in ns
 INTGATE = 300		# in ns
 PREG = 0			# in ns
 THRESHOLD = 1.5     # in pe
@@ -108,6 +108,8 @@ parser.add_argument('-d', '--device', nargs='?', type=str,
                     choices=['cpu', 'gpu'], default='cpu')
 parser.add_argument('-g', '--graphics', action='count',
                     help='Histograms of generated events')
+parser.add_argument('-D', '--debug', action='count',
+                    help='Activate debug info')
 parser.add_argument('-q', '--quiet', action='count', help='Quiet')
 parser.add_argument('-w', '--write', nargs='?', type=str,
                     help='File to write as output', metavar='filename.root')
@@ -188,9 +190,9 @@ if INTGATE + INTSTART > SIGLEN:
 INTSTART = int(INTSTART / SAMPLING)
 INTGATE = int(INTGATE / SAMPLING)
 PREG = int(INTSTART - PREG / SAMPLING)
-PEAKHEIGHT = -exp(TFALL*np.log(TRISE/TFALL)/(TFALL - TRISE)) + exp(TRISE*np.log(TRISE/TFALL)/(TFALL - TRISE))
-THRESHOLD = THRESHOLD * PEAKHEIGHT
-SNR = PEAKHEIGHT * 10**(-SNR / 20)
+PEAKRATIO = -exp(TFALL*np.log(TRISE/TFALL)/(TFALL - TRISE)) + exp(TRISE*np.log(TRISE/TFALL)/(TFALL - TRISE))
+PEAKRATIO = 1 / PEAKRATIO
+SNR = 10**(-SNR / 20)
 
 TF = TFALL / SAMPLING
 TR = TRISE / SAMPLING

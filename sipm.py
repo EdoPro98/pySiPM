@@ -33,6 +33,7 @@ def SiPM(times, other=None):
     @return signal If the options -W is enabled the complete SiPM signal
     will be passed in the output. Otherwise this output is "None".
     """
+    times = list(filter(isinwindow, times))
     npe = len(times)
     ndcr = 0
     nxt = 0
@@ -52,7 +53,7 @@ def SiPM(times, other=None):
         times, idx, nxt = addXT(times, idx, XT)
 
     # Calculate signal height of each cell
-    times, sigH = SiPMEventAction(times, idx)
+    times, sigH = SiPMEventAction(times, idx, args.debug)
 
     # Add AP events
     if not args.noap:
@@ -62,7 +63,7 @@ def SiPM(times, other=None):
     signal = SiPMSignalAction(times, sigH, SNR, BASESPREAD)
 
     # # Select signal in the integration gate
-    peak, integral, tstart, tovert, tpeak = signalAnalysis(signal, INTSTART, INTGATE, THRESHOLD)
+    peak, integral, tstart, tovert, tpeak = signalAnalysis(signal, INTSTART, INTGATE, THRESHOLD, args.debug)
 
     # Plots
     if args.Graphics:
@@ -76,11 +77,6 @@ def SiPM(times, other=None):
             else:
                 dev = 'gpu'
         sigPlot(signal, len(times), ndcr, dev)
+    debug = (npe, ndcr, nxt, nap)
 
-    # If no need to output the signal substitute with None to save space
-    if not args.wavedump:
-        signal = None
-
-    # debug = (npe, ndcr, nxt, nap)
-
-    return (integral, peak, tstart, tovert, tpeak), other, signal
+    return (peak, integral, tstart, tovert, tpeak), other, signal, debug

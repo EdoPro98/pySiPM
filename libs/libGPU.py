@@ -34,7 +34,7 @@ def PulseGPU(t, h):
     # Zero before the signal
     vect[vect < 0] = 0
     # Transpose array of height values
-    h = h[:, None]
+    h = h[:, None] * PEAKRATIO
     # Call kernel to generate singal
     sig = cp.sum(signalShapeGPU(vect, TFALL / SAMPLING, TRISE / SAMPLING, h), axis=0)
     # If there are afterpulses generate theyr signals

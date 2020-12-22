@@ -8,32 +8,27 @@ recomended to launch this script on a small dataset if using the -W option
 to save the waveforms. If you need to save waveforms of big datasets use the
 file called 'wavedump.py'.
 '''
-from main import *
+from sipm import *
 
 # Openig file
-fname = '../Data/muon_20GeV.digi'
-f = open(fname)
-print(f'Opening file: {fname}')
-lines = f.readlines()
-f.close()
+fname = 'Data/E40GeV_1kevents.txt'
 
 # Reading txt file
-TIMES = []
-OTHER = []
-temp = 0
-for line in lines:
-    if not line.strip():
-        continue
-    L = line.split(',')
-    t = np.array(L[6:], dtype='float32')
-    TIMES.append(t)
-    OTHER.append((np.float32(L[0]), np.float32(L[1] == 'Scin'), np.float32(L[2]), np.float32(L[3]), np.float32(L[4]), np.float32(L[5])))
-    if int(L[0]) % 100 == 0 and int(L[0]) > 0 and temp != L[0]:
-        temp = L[0]
-        print(f'Reading event: {int(L[0]):d} / {int(lines[-1].split()[0]):d}', end='\r')
-    # if L[0] == '10':
-    #     break
-del lines
+with open(fname) as f:
+    print(f'Opening file: {fname}')
+    TIMES = []
+    OTHER = []
+    temp = 0
+    for line in f:
+        if not line.strip():
+            continue
+        L = line.split(' ')
+        t = list(map(float,L[7:]))
+        TIMES.append(t)
+        OTHER.append((int(L[0]), int(L[1] == 'Scin'), int(L[2]), float(L[3]), float(L[4]), float(L[5])))
+        if int(L[0]) % 100 == 0 and int(L[0]) > 0 and temp != L[0]:
+            temp = L[0]
+            print(f'Reading event: {int(L[0]):d}', end='\r')
 
 OTHER = np.array(OTHER)
 INPUT = zip(TIMES, OTHER)
@@ -61,7 +56,8 @@ Te = time.time()
 for i, r in enumerate(res.get()):
     output[i, :] = r[0]
     other[i, :] = r[1]
-    signals[i, :] = r[2]
+    if args.wavedump:
+        signals[i, :] = r[2]
 
 print('\n===> Simulation finished <===\n')
 print(f'Execution time: {(Te-Ts):.2f}s')

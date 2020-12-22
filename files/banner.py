@@ -16,7 +16,7 @@ if importlib.util.find_spec('cupy'):
 if importlib.util.find_spec('ROOT'):
   from ROOT import gROOT
   rootversion = gROOT.GetVersion()
-    
+
 assert importlib.util.find_spec('numpy'), 'Numpy is needed, please install using: pip install numpy'
 assert importlib.util.find_spec('matplotlib'), 'Matplotlib is needed, please install using: pip install matplotlib'
 assert importlib.util.find_spec('h5py'), 'H5py is needed, please install using: pip install h5py'

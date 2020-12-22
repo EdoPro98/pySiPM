@@ -1,0 +1,6 @@
+# Signal parameters
+SAMPLING = 0.1        # in ns
+INTSTART = 10
+INTGATE = 300
+CELLSIZE = 25		    # in um
+CELLRECOVERY = 20   # in ns

@@ -18,5 +18,5 @@ def PulseCPU(t, h):
     @return s: Array containing the generated cell signal
     """
     # Calculate signal
-    sig = fsignal(t, TF, TR, h, SIGPTS)
+    sig = fsignal(t, TF, TR, h*PEAKRATIO, SIGPTS)
     return sig

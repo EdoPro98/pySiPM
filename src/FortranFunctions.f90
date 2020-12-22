@@ -67,7 +67,7 @@ subroutine integer(out, sup, n)
   implicit none
   integer(8)     :: sup, n, out(n)
   real(8)        :: u(n)
-!f2py intent(in) ncells, nsig
+!f2py intent(in) sup,n
 !f2py intent(out) out
   sup = sup + 1
   call random_number(u)
@@ -96,12 +96,13 @@ subroutine normal(out, mu, sigma, n)
   call random_number(u)
 
   where (v .lt. tiny(v)) v = tiny(v)
-
+  u = u * pi2
 
   logs = log(v)
   logs = sqrt(-2.00E0 * logs)
 
-  out = logs * cos(pi2 * u) * sigma + mu
+  out = logs * cos(u)
+  out = out * sigma + mu
 end subroutine normal
 
 
@@ -115,7 +116,7 @@ end subroutine normal
 !-------------------------------------------------------
 subroutine poisson(out, mu, n)
   implicit none
-  integer(8)     :: n, out(n),i
+  integer(8)     :: n, out(n)
   real(8)        :: mu, L, p(n), u
 !f2py intent(in) mu, n
 !f2py intent(out) out
@@ -124,18 +125,10 @@ subroutine poisson(out, mu, n)
   out = -1
   p = 1
 
-  do i=1,n
-    do while(p(i) .gt. L)
-      call random_number(u)
-      out(i) = out(i) + 1
-      p(i) = p(i) * u
-    end do
-  end do
-
   do while(any(p .gt. L))
     where (p .gt. L) out = out + 1
     call random_number(u)
-    where (p .gt. L) p = p * u
+    p = p * u
   end do
 end subroutine poisson
 
@@ -168,11 +161,12 @@ end module frandom
 !> @param array Array to be sorted
 !> @param n Number of elements in the array
 !--------------------------------------------------------
-subroutine fsort(array,n)
+pure subroutine fsort(array,n)
   implicit none
-  integer(8)       :: i, j, left, right, n
-  real(8)          :: array(n)
-  real(8)          :: temp, p, next
+  integer(8)            :: i, j, left, right
+  integer(8),intent(in) :: n
+  real(8),intent(inout) :: array(n)
+  real(8)               :: temp, p, next
 !f2py intent(inout) array
 !f2py intent(hide), depend(array) n = len(array)
 
@@ -208,6 +202,7 @@ subroutine fsort(array,n)
      endif
   end do
 end subroutine fsort
+
 
 subroutine signalanalysisfortran(integral, peak, toa, tot, top, signalingate, sampling)
 
